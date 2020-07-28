@@ -274,6 +274,12 @@
                     @media screen and (min-width: 1700px) {
                         .main_father > .container#mainBox > main { width: 900px !important; float: none; margin: auto !important; margin-top: 20px !important; }
                     }
+                    /* 文章顶部信息栏样式重写 */
+                    .article-type-img {
+                        margin: 3px 8px 0px 10px !important;
+                        width: 30px !important;
+                        height: 25px !important;
+                    }
                     /* 评论区样式重写 | 2019-12-27 21:32:24 */
                     .comment-list-container img.avatar {
                         width: var(--comments-avatar-size) !important;
@@ -290,6 +296,10 @@
                         .recommend-right.align-items-stretch { color: teal; display: none !important; }
                     }
                     /* 隐藏底部 more-toolbox 按钮组 ~~和底部作者 row 中的其他信息~~; 还是保留这一行吧 ... 以后可能会把更多对文章和作者的操作放到这里面 | 2019-12-17 22:18:16 */
+                    /* 隐藏CSDN底部more-toolbox部分按钮, 所有推荐, footer */
+                    .tool-phong, .tool-more, .tool-attend, .recommend-box, .post_feed_box, .footer-box {
+                        display: none !important;
+                    }
                     /* 修改底部 私信求帮助 按钮样式 | 2019-11-23 17:37:52 */
                     .reward-user-box .reward-fexd { width: 100px !important; }
                     .reward-user-box .reward-word { display: none !important; }
