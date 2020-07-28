@@ -220,7 +220,7 @@
                         --background-image: ${bgColor ? 'none' : imgUrl};
                     }
                     body:not(.clean-mode) { background-color: var(--background-color) !important; background-image: var(--background-image); background-attachment: fixed !important;background-size; cover; background-repeat: no-repeat; background-size: 100% !important; }
-                    body>#page>#content, body>.container.container-box,main,body>.main.clearfix { opacity: 0.9; }
+                    body>#page>#content, body>.container.container-box,main,body>.main.clearfix { opacity: 0.95; }
                     main {margin: 20px;}
                     #local { position: fixed; left: -99999px }
                     .recommend-item-box .content,.post_feed_box,.topic_r,.mod_topic_wrap,#bbs_title_bar,#bbs_detail_wrap,#left-box,main {width: 100% !important;}
@@ -233,10 +233,10 @@
                     #bbs_title_bar {margin-top: 20px;}
                     #page>#content {margin-top: 0 !important;}
                     /* 评论区每行增加 hover 效果 | 2020-05-17 18:32:22 */
-                    .comment-box { background-color: rgba(255,255,255,0.9) !important; }
+                    .comment-box { background-color: rgba(255,255,255,0.95) !important; }
                     .comment-list-box { padding: 0 !important; }
                     .comment-list-box > .comment-list { padding: 0 24px; margin-top: 0 !important; padding-top: 16px }
-                    .comment-list-box > .comment-list:hover { background-color: rgba(255,255,255,0.7); }
+                    .comment-list-box > .comment-list:hover { background-color: rgba(255,255,255,0.95); }
                     /* 屏蔽固定在页面底部的 toolbox | 2020-05-17 18:28:03 */
                     .more-toolbox > .left-toolbox { position: relative !important; left: 0 !important; }
                     /* 底部作者信息右侧按钮只显示关注 | 2020-05-17 18:26:52 */
@@ -263,16 +263,16 @@
                     .comment-box .comment-list-container .comment-list .new-comment { display: block !important; }
                     /* 覆盖所有 media query 样式以防止原有的自适应样式导致布局错乱 | 2020-02-19 08:28:52 */
                     @media screen and (max-width: 1379px) and (min-width: 1320px) {
-                        .main_father > .container#mainBox > main { width: 100% !important; float: none; margin: 0 !important; margin-top: 20px !important; }
+                        .main_father > .container#mainBox > main { width: 900px !important; float: none; margin: auto !important; margin-top: 20px !important; }
                     }
                     @media screen and (max-width: 1699px) and (min-width: 1550px) {
-                        .main_father > .container#mainBox > main { width: 100% !important; float: none; margin: 0 !important; margin-top: 20px !important; }
+                        .main_father > .container#mainBox > main { width: 900px !important; float: none; margin: auto !important; margin-top: 20px !important; }
                     }
                     @media screen and (max-width: 1549px) and (min-width: 1380px) {
-                        .main_father > .container#mainBox > main { width: 100% !important; float: none; margin: 0 !important; margin-top: 20px !important; }
+                        .main_father > .container#mainBox > main { width: 900px !important; float: none; margin: auto !important; margin-top: 20px !important; }
                     }
                     @media screen and (min-width: 1700px) {
-                        .main_father > .container#mainBox > main { width: 100% !important; float: none; margin: 0 !important; margin-top: 20px !important; }
+                        .main_father > .container#mainBox > main { width: 900px !important; float: none; margin: auto !important; margin-top: 20px !important; }
                     }
                     /* 评论区样式重写 | 2019-12-27 21:32:24 */
                     .comment-list-container img.avatar {
@@ -299,14 +299,14 @@
                     /* iteye 样式重构 | 2019-11-02 11:19:43 */
                     body>#page>#content, body>#page>#content>#main .blog_comment { width: auto; }
                     body>#page>#content>#main .blog_bottom { height: 30px; }
-                    body>#page>#content>#main .blog_comment .comment_content { background-color: rgba(255, 214, 173, 0.2); }
+                    body>#page>#content>#main .blog_comment .comment_content { background-color: rgba(255, 214, 173, 0.95); }
                     body>#page>#content, body>#page>#content>#main { border: none; }
                     body>#page>#content>#main #bottoms, body>#page>#content>#main .blog_nav { display: none; }
                     body>#page>#content>#main .blog_title h3 { font-size: 24px; word-wrap: break-word; margin-bottom: 25px; }
                     body>#page>#content>#main, #bbs_title_bar > .owner_top,.blog-content-box { border-top-left-radius: 8px; border-top-right-radius: 8px; }
                     body > div#page {background-color: transparent}
                     .dl_no_more:after { content: "上边是原话, 脚本作者原本想屏蔽这段话, 但是 CSDN 从未找到自己的底线;\\A 从阅读更多必须注册, 到验证手机号必须关注公众号, 再到大尺度H广告, 严重影响了用户体验;\\A 自从 CSDN 使用明文密码被脱库之后我就不再使用 CSDN 账号, 为了继续阅读 CSDN 内容我写了这个脚本  "; color: teal; display: block; width: 60%; margin: auto; white-space: pre; }
-                    .recommend-box>.recommend-item-box:hover { background-color: rgba(255,255,255,0.8); }
+                    .recommend-box>.recommend-item-box:hover { background-color: rgba(255,255,255,0.95); }
                     /* 脚本设置弹窗 */
                     a.option-box[data-type="$setting"] img {
                         -webkit-transform: rotate(360deg);
