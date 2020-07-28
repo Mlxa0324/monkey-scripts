@@ -297,7 +297,7 @@
                     .reward-user-box .reward-fexd > div { color: transparent; }
                     .reward-user-box:hover .reward-fexd > div { color: #B4B4B4; }
                     /* iteye 样式重构 | 2019-11-02 11:19:43 */
-                    body>#page>#content, body>#page>#content>#main .blog_comment { width: auto; }
+                    body>#page>#content, body>#page>#content>#main .blog_comment { width: 900px; }
                     body>#page>#content>#main .blog_bottom { height: 30px; }
                     body>#page>#content>#main .blog_comment .comment_content { background-color: rgba(255, 214, 173, 0.95); }
                     body>#page>#content, body>#page>#content>#main { border: none; }
