@@ -4,8 +4,8 @@
 // @version     1.0
 // @author      smallx
 // @description 知乎下一条回答左手快捷键 | 知乎Tab下一条回答
-// @homepageURL 
-// @updateURL   
+// @homepageURL https://github.com/smallx/monkey-scripts/tree/master/zhihu-next-answer
+// @updateURL   https://github.com/smallx/monkey-scripts/raw/master/zhihu-next-answer/zhihu-next-answer.user.js
 // @match       *://www.zhihu.com/*
 // @grant       none
 // @run-at      document-end
