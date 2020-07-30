@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        知乎下一条回答左手快捷键
 // @namespace   Violentmonkey Scripts
-// @version     1.0
+// @version     1.1
 // @author      smallx
 // @description 知乎下一条回答左手快捷键 | 知乎Tab下一条回答
 // @homepageURL https://github.com/smallx/monkey-scripts/tree/master/zhihu-next-answer
@@ -65,10 +65,10 @@
         var url = window.location.href;
         if (/^(http|https):\/\/www.zhihu.com(\/|\/follow)?$/.test(url)) {                       // 首页 推荐/关注
             return document.querySelectorAll('.TopstoryItem:not(.TopstoryItem--advertCard)');
-        } else if (/^(http|https):\/\/www.zhihu.com\/question\/(\d)+$/.test(url)) {             // 问题全部回答页面
-            return document.querySelectorAll('.List-item');
         } else if (/^(http|https):\/\/www.zhihu.com\/question\/(\d)+\/answer\/*/.test(url)) {   // 问题单个回答页面
             return document.querySelectorAll('.QuestionAnswer-content, .List-item');
+        } else if (/^(http|https):\/\/www.zhihu.com\/question\/(\d)+/.test(url)) {              // 问题全部回答页面
+            return document.querySelectorAll('.List-item');
         } else if (/^(http|https):\/\/www.zhihu.com\/search\/*/.test(url)) {                    // 搜索结果页面
             return document.querySelectorAll('.List-item');
         }
