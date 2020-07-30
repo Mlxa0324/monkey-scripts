@@ -11,6 +11,9 @@
 // @run-at      document-end
 // ==/UserScript==
 
+// 快捷键:
+// - Tab: 下一条回答
+// - Shift + Tab: 上一条回答
 (function () {
     'use strict';
 
