@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        知乎下一条回答左手快捷键
 // @namespace   Violentmonkey Scripts
-// @version     1.1
+// @version     1.2
 // @author      smallx
 // @description 知乎下一条回答左手快捷键 | 知乎Tab下一条回答
 // @homepageURL https://github.com/smallx/monkey-scripts/tree/master/zhihu-next-answer
@@ -14,6 +14,8 @@
 // 快捷键:
 // - Tab: 下一条回答
 // - Shift + Tab: 上一条回答
+// - 空格: 向下滚动一屏幕 减去 知乎导航条高度 减去 收起评论按钮栏高度
+// - Shift + 空格: 向上滚动一屏幕 减去 知乎导航条高度 减去 收起评论按钮栏高度
 (function () {
     'use strict';
 
@@ -77,14 +79,15 @@
     var currentIndex = -1;  // 当前滚动到了哪个回答
 
     window.onkeydown = function(event) {
-        if (event.keyCode == 9) {   // Tab键
 
-            var target = event.target;
-            if (target.tagName == 'input'
-            || target.tagName == 'textarea' 
-            || ` ${target.className} `.indexOf(' public-DraftEditor-content ') != -1) {
-                return;
-            }
+        var target = event.target;
+        if (target.tagName == 'input'
+        || target.tagName == 'textarea' 
+        || ` ${target.className} `.indexOf(' public-DraftEditor-content ') != -1) {
+            return;
+        }
+        
+        if (event.keyCode == 9) {   // Tab键
 
             event.preventDefault();
 
@@ -114,6 +117,14 @@
             }
             items[nextIndex].style.boxShadow = '0px 0px 6px #BBB';
             currentIndex = nextIndex;
+
+        } else if (event.keyCode == 32) {   // 空格
+            event.preventDefault();
+            if (event.shiftKey) {
+                window.scrollTo(0, window.scrollY - (window.innerHeight - 52 - 54 - 3));
+            } else {
+                window.scrollTo(0, window.scrollY + (window.innerHeight - 52 - 54 - 3));
+            }
         }
     };
 })();
