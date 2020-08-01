@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        知乎下一条回答左手快捷键
 // @namespace   Violentmonkey Scripts
-// @version     1.2
+// @version     1.3
 // @author      smallx
 // @description 知乎下一条回答左手快捷键 | 知乎Tab下一条回答
 // @homepageURL https://github.com/smallx/monkey-scripts/tree/master/zhihu-next-answer
@@ -81,8 +81,8 @@
     window.onkeydown = function(event) {
 
         var target = event.target;
-        if (target.tagName == 'input'
-        || target.tagName == 'textarea' 
+        if (target.tagName == 'INPUT'
+        || target.tagName == 'TEXTAREA'
         || ` ${target.className} `.indexOf(' public-DraftEditor-content ') != -1) {
             return;
         }
