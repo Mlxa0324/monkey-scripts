@@ -736,170 +736,167 @@
         .qs-toolbar {
             /* 初始化所有style, 避免被网页本身的style影响 */
             all: initial;
-            position: absolute !important;
+            position: absolute;
             display: block;
             height: 26px;
-            padding: 2px !important;
-            border: 1px solid #F5F5F5 !important;
-            box-shadow: 0px 0px 2px #BBB !important;
-            background-color: #FFF !important;
-            z-index: 10000 !important;
+            padding: 2px;
+            border: 1px solid #F5F5F5;
+            box-shadow: 0px 0px 2px #BBB;
+            background-color: #FFF;
+            z-index: 10000;
         }
         .qs-toolbar-icon {
             all: initial;
             display: inline-block;
-            margin: 0px !important;
-            padding: 2px !important;
-            width: 20px !important;
-            height: 20px !important;
-            border: 1px solid #FFF !important;
-            cursor: pointer !important;
+            margin: 0px;
+            padding: 2px;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #FFF;
+            cursor: pointer;
         }
         .qs-toolbar-icon:hover {
-            border: 1px solid #CCC !important;
+            border: 1px solid #CCC;
         }
         /* 主窗口 */
         .qs-mainbox {
             all: initial;
+            position: fixed;
             display: block;
-            position: fixed !important;
-            overflow: scroll !important;
-            left: 50% !important;
-            top: 50% !important;
-            transform: translate(-50%, -50%) !important;
+            text-align: center;
+            overflow: scroll;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
             width: fit-content;
-            min-width: 500px !important;
-            max-width: 1400px !important;
-            min-height: 123px !important;
-            max-height: 700px !important;
-            padding: 10px !important;
-            text-align: center !important;
-            border: 1px solid #F5F5F5 !important;
-            box-shadow: 0px 0px 6px #BBB !important;
-            border-radius: 10px !important;
-            background-color: #FFF !important;
-            opacity: 1 !important;
-            z-index: 10000 !important;
+            min-width: 500px;
+            max-width: 1400px;
+            min-height: 123px;
+            max-height: 650px;
+            padding: 10px;
+            border: 1px solid #F5F5F5;
+            box-shadow: 0px 0px 6px #BBB;
+            border-radius: 10px;
+            background-color: #FFF;
+            opacity: 1;
+            z-index: 10000;
         }
         /* 主窗口搜索框 */
         .qs-main-search-box {
             all: initial;
             display: block;
-            text-align: center !important;
-            width: 100% !important;
-            margin: 5px !important;
-            border: 0px !important;
+            text-align: center;
+            width: 100%;
+            margin: 5px 0px;
+            border: 0px;
         }
         .qs-main-search-input {
             all: initial;
-            text-align: left !important;
-            width: 85% !important;
-            min-width: 450px !important;
-            max-width: 600px !important;
-            height: 40px !important;
-            padding: 0px 13px !important;
-            font: 16px/18px arial !important;
-            border: 2px solid #C4C7CE !important;
-            border-radius: 10px !important;
-            outline: none !important;
+            text-align: left;
+            width: 80%;
+            min-width: 400px;
+            max-width: 600px;
+            height: 40px;
+            padding: 0px 13px;
+            font: 16px/18px arial;
+            border: 2px solid #C4C7CE;
+            border-radius: 10px;
+            outline: none;
         }
         .qs-main-search-input:hover {
-            border-color: #4E71F2 !important;
+            border-color: #4E71F2;
         }
         .qs-main-search-input::placeholder {
-            color: #EEE !important;
-            opacity: 1 !important;
+            color: #EEE;
+            opacity: 1;
         }
         /* 主窗口常用搜索引擎列表 */
         .qs-main-frequent-box {
             all: initial;
             display: block;
-            text-align: center !important;
-            margin-top: 8px !important;
-            width: 100% !important;
-            border: 0px !important;
+            text-align: center;
+            margin-top: 8px;
+            width: 100%;
+            border: 0px;
         }
         .qs-main-frequent-icon {
             all: initial;
             display: inline-block;
-            margin: 0px 6px !important;
-            padding: 3px !important;
-            width: 28px !important;
-            height: 28px !important;
-            border: 2px solid #FFF !important;
-            cursor: pointer !important;
+            width: 28px;
+            height: 28px;
+            margin: 0px 6px;
+            padding: 3px;
+            border: 2px solid #FFF;
+            cursor: pointer;
         }
         .qs-main-frequent-icon:hover {
-            border: 2px solid #CCC !important;
+            border: 2px solid #CCC;
         }
         /* 主窗口分类搜索引擎列表 */
         .qs-main-classified-box {
             all: initial;
             display: block;
-            width: 100% !important;
-            border: 0px !important;
-            text-align: center !important;
-            margin-top: 8px !important;
-            border-top: 1px solid #DDD !important;
+            text-align: center;
+            width: 100%;
+            margin-top: 8px;
+            padding-top: 5px;
+            border: 0px;
+            border-top: 1px solid #DDD;
         }
         .qs-main-classified-family-box {
             all: initial;
             display: inline-block;
-            
-            margin: 5px 3px !important;
-            text-align: left !important;
-            vertical-align: top !important;
-            min-width: 50px !important;
-            max-width: 150px !important;
-            height: 100% !important;
-            border: 0px !important;
+            text-align: left;
+            vertical-align: top;
+            min-width: 50px;
+            max-width: 150px;
+            height: 100%;
+            margin: 5px 3px;
+            border: 0px;
         }
         .qs-main-classified-family-title {
             all: initial;
             display: block;
-            margin: 5px 2px;
-            text-align: left !important;
-            font-size: 18px !important;
-            font-weight: 300 !important;
-            color: #777 !important;
-            border: 0px !important;
+            text-align: left;
+            margin: 5px 4px;
+            font-size: 18px;
+            font-weight: 300;
+            color: #777;
+            border: 0px;
         }
         .qs-main-classified-family-engine {
             all: initial;
             display: block;
-            text-align: left !important;
-            vertical-align: middle !important;
-            padding: 0px !important;
-            height: 26px !important;            
-            cursor: pointer !important;
-            border: 2px solid #FFF !important;
+            text-align: left;
+            vertical-align: middle;
+            height: 26px;
+            border: 2px solid #FFF;
+            cursor: pointer;
         }
         .qs-main-classified-family-engine:hover {
-            border: 2px solid #CCC !important;
+            border: 2px solid #CCC;
         }
         .qs-main-classified-family-engine-icon {
             all: initial;
             display: inline-block;
-            width: 16px !important;
-            height: 16px !important;
-
-            margin: 0px 3px 0px 2px !important;
-            vertical-align: middle !important;
-            border: 0px !important;
-            cursor: pointer !important;
+            vertical-align: middle;
+            width: 16px;
+            height: 16px;
+            margin: 0px 3px 0px 2px;
+            border: 0px;
+            cursor: pointer;
         }
         .qs-main-classified-family-engine-name {
             all: initial;
             display: inline-block;
-            margin: 0px 2px 0px 0px !important;
-            font-size: 13px !important;
-            font-family: arial,sans-serif !important;
-            font-weight: 400 !important;
-            line-height: 13px !importants;
-            color: #5F5F5F !important;
-            vertical-align: middle !important;
-            border: 0px !important;
-            cursor: pointer !important;
+            vertical-align: middle;
+            margin-right: 2px;
+            font-size: 13px;
+            font-family: arial,sans-serif;
+            font-weight: 400;
+            color: #5F5F5F;
+            border: 0px;
+            cursor: pointer;
         }
     `;
 
