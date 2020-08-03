@@ -740,6 +740,7 @@
             display: block;
             height: 26px;
             padding: 2px;
+            white-space: nowrap;
             border: 1px solid #F5F5F5;
             box-shadow: 0px 0px 2px #BBB;
             background-color: #FFF;
@@ -771,7 +772,7 @@
             width: fit-content;
             min-width: 500px;
             max-width: 1400px;
-            min-height: 123px;
+            min-height: 75px;
             max-height: 650px;
             padding: 10px;
             border: 1px solid #F5F5F5;
@@ -815,8 +816,10 @@
             all: initial;
             display: block;
             text-align: center;
-            margin-top: 8px;
             width: 100%;
+            height: 38px;
+            margin: 15px 0px 5px 0px;
+            white-space: nowrap;
             border: 0px;
         }
         .qs-main-frequent-icon {
@@ -838,7 +841,7 @@
             display: block;
             text-align: center;
             width: 100%;
-            margin-top: 8px;
+            margin-top: 15px;
             padding-top: 5px;
             border: 0px;
             border-top: 1px solid #DDD;
@@ -904,14 +907,33 @@
     // 功能函数
     ///////////////////////////////////////////////////////////////////
 
+    // 获取元素style属性, 包括css中的
+    function getStyleByElement(e, styleProp) {
+        if (window.getComputedStyle) {
+            return document.defaultView.getComputedStyle(e, null).getPropertyValue(styleProp);
+        } else if (e.currentStyle) {
+            return e.currentStyle[styleProp];
+        }
+    }
+
+    // 获取可视窗口在文档(页面)中的绝对位置
+    function getWindowPosition() {
+        return {
+            top: window.scrollY,
+            bottom: window.scrollY + window.innerHeight,
+            left: window.scrollX,
+            right: window.scrollX + window.innerWidth
+        };
+    }
+
     // 获取选中文本
     function getSelection() {
         return window.getSelection().toString().trim();
     }
 
     // 获取当前页面匹配的 搜索引擎 及 同类别的搜索引擎列表.
-    // TODO 目前只是简单地匹配, 待完善.
-    function getMatchedEngine() {
+    // TODO 目前只是简单地匹配域名, 待完善.
+    function getMatchedEngineInfo() {
         var hostname = window.location.hostname;
         hostname = hostname.replace(/^(www\.)/, '');
 
@@ -946,17 +968,18 @@
         return url.substring(domain.length);
     }
 
-    // 获取当前页面对应的搜索词
+    // 获取当前页面url中的搜索词
     //
     // 如果当前页面在配置的搜索引擎列表中, 尝试从url中解析参数, 分为engine.url中含有问号(?)和不含问号(?)两种情况.
     // 如果没有解析到或者当前页面不在配置的搜索引擎列表中, 尝试获取文本在url中完整出现的input/textarea的值.
-    // 如果还是没有, 则认为当前页面没有搜索词.
-    function getNowQuery() {
-        var engine = getMatchedEngine();
+    // 如果还是没有, 则认为当前页面url中没有搜索词.
+    function getUrlQuery() {
 
-        // 尝试从url中获取搜索词
-        if (engine) {
-            engine = engine.engine;
+        var engineInfo = getMatchedEngineInfo();
+
+        // 尝试利用配置的搜索引擎信息从url中获取搜索词
+        if (engineInfo) {
+            var engine = engineInfo.engine;
             if (engine.url.includes('?')) {    // engine.url中含有问号(?)
                 var queryKey = getQueryKey(engine);
                 var params = new URLSearchParams(window.location.search);
@@ -977,8 +1000,8 @@
         var eles = document.querySelectorAll('input, textarea');
         for (var ele of eles) {
             var encodedValue = encodeURIComponent(ele.value.trim());
-            console.log('test: ' + encodedValue);
-            if (encodedValue && window.location.href.includes(encodedValue)) {
+            var urlTail = removeDomain(window.location.href);
+            if (encodedValue && urlTail.includes(encodedValue)) {
                 return encodedValue;
             }
         }
@@ -1006,6 +1029,7 @@
 
         // 常用搜索引擎按钮
         conf.frequentEngines.forEach((engine, index) => {
+            if (!engine.enable) return;
             var icon = document.createElement('img');
             icon.id = 'qs-toolbar-icon-' + index;
             icon.className = 'qs-toolbar-icon';
@@ -1020,9 +1044,9 @@
 
         // 直达网址按钮
         var icon = document.createElement('img');
-        icon.id = 'qs-toolbar-icon-open-url';
+        icon.id = 'qs-toolbar-icon-url';
         icon.className = 'qs-toolbar-icon';
-        icon.src = 'data:image/x-icon;base64,AAABAAEAICAAAAEAIACoEAAAFgAAACgAAAAgAAAAQAAAAAEAIAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAACBemwQgXpsiIF6bO+Bemz/gXps+4F6bPqBemz6gXps+oF6bPqBemz6gXps+oF6bPqBemz6gXps+oF6bPqBemz6gXps+oF6bPqBemz6gXps+oF6bPqBemz6gXps/4F6bPmBemyqgXpsIYF6bACBemwAAAAAAAAAAAAAAAAAAAAAAIF6bImBemz8gXps14F6bHmBemxTgXpsUIF6bFCBemxQgXpsUIF6bFCBemxQgXpsUIF6bFCBemxQgXpsUIF6bFCBemxQgXpsUIF6bFCBemxQgXpsUIF6bFCBemxpgXpswIF6bP+BemyogXpsCoF6bAAAAAAAAAAAAAAAAAAAAAAAgXps74F6bNeBemwvgXpsAIF6bACBemwAgXpsAIF6bACBemwAgXpsAIF6bACBemwAgXpsAIF6bACBemwAgXpsAIF6bACBemwAgXpsAIF6bACBemwAgXpsAIF6bACBemwSgXpssIF6bPKBemwygXpsAIF6bACBemwAgXpsAIF6bACBemz/gXpseIF6bACBemwAgXpsAIF6bACBemwAgXpsAIF6bAWBemwngXpsN4F6bDaBemw2gXpsNoF6bDaBemw2gXpsNoF6bDaBemw2gXpsNoF6bDaBemw2gXpsN4F6bDKBemxzgXps9YF6bG6BemwzgXpsN4F6bCiBemwFgXpsAIF6bPuBemxTgXpsAIF6bAAAAAAAgXpsAIF6bACBemwUgXpslIF6bOaBemzygXps8YF6bPGBemzygXps84F6bPKBemzxgXps8YF6bPKBemzygXps8YF6bPKBemzygXps8YF6bPSBemz+gXps9oF6bPKBemzygXps54F6bJiBemwagXps+oF6bFCBemwAAAAAAAAAAACBemwAgXpsAIF6bIaBemz/gXps/4F6bP+Bemz/gXps/4F6bPmBemzogXps8oF6bP+Bemz/gXps9oF6bPuBemz/gXps/YF6bPOBemz7gXps84F6bPCBemzwgXps9IF6bP+Bemz/gXps/4F6bKGBemz6gXpsUYF6bAAAAAAAAAAAAIF6bACBemwSgXps0IF6bP+Bemz/gXps/4F6bP+BemzegXpsWYF6bD+BemxFgXpstoF6bPmBemxrgXpsuIF6bP+BemyVgXpsZ4F6bNaBemxOgXpsR4F6bEqBemx0gXps9oF6bP+Bemz/gXps84F6bPqBemxRgXpsAAAAAAAAAAAAgXpsAIF6bBqBemzbgXps/4F6bP+Bemz/gXps/4F6bImBemxBgXps1IF6bHiBemxLgXps74F6bEGBemymgXpsy4F6bCuBemypgXps3IF6bCqBemysgXps04F6bNyBemz9gXps/4F6bP+Bemz/gXps+oF6bFGBemwAAAAAAAAAAACBemwAgXpsGoF6bNuBemz/gXps/4F6bP+Bemz/gXpscoF6bG2Bemz/gXpsr4F6bD6BemzpgXpsQ4F6bESBemwvgXpsRIF6bOqBemzcgXpsMIF6bNSBemz/gXps/4F6bP+Bemz/gXps/4F6bP+Bemz6gXpsUYF6bAAAAAAAAAAAAIF6bACBemwagXps24F6bP+Bemz/gXps/4F6bP+BemxxgXpsbYF6bP+BemyugXpsPoF6bOmBemxDgXpsaoF6bKqBemxMgXpse4F6bNuBemwwgXps0oF6bP+Bemz/gXps/4F6bP+Bemz/gXps/4F6bPqBemxRgXpsAAAAAAAAAAAAgXpsAIF6bBqBemzbgXps/4F6bP+Bemz/gXps/4F6bG+BemxqgXps/4F6bKyBemw6gXps6IF6bECBemxsgXpsroF6bEiBemxpgXps2oF6bC2BemzRgXps/4F6bP+Bemz/gXps/4F6bP+Bemz/gXps+oF6bFGBemwAAAAAAAAAAACBemwAgXpsGYF6bNmBemz/gXps/4F6bP+Bemz/gXpspoF6bKOBemz/gXpszIF6bIWBemzxgXpsiIF6bF6BemxjgXpseIF6bNqBemzrgXpshYF6bOWBemz/gXps/4F6bP+Bemz/gXps/4F6bP6Bemz6gXpsUYF6bAAAAAAAAAAAAIF6bACBemwKgXpsuoF6bP+Bemz/gXps/4F6bP+Bemz/gXps/4F6bP+Bemz/gXps/4F6bP+Bemz/gXps/oF6bP+Bemz/gXps/4F6bP+Bemz/gXps/4F6bP+Bemz/gXps/4F6bP+Bemz/gXps3IF6bPqBemxRgXpsAAAAAAAAAAAAgXpsAIF6bACBemxOgXps6oF6bP+Bemz/gXps/4F6bP+Bemz/gXps/4F6bP+Bemz/gXps/4F6bP+Bemz/gXps/4F6bP+Bemz/gXps/4F6bP+Bemz/gXps/4F6bP+Bemz/gXps/4F6bOuBemxhgXps+oF6bFGBemwAAAAAAAAAAACBemwAgXpsAIF6bAGBemxAgXpslYF6bK6BemywgXpssYF6bLGBemyxgXpssYF6bLGBemyxgXpssYF6bLGBemyxgXpssYF6bLGBemywgXpsvIF6bPWBemzHgXpssIF6bLCBemyYgXpsRIF6bAKBemz6gXpsUYF6bAAAAAAAAAAAAAAAAACBemwAgXpsAIF6bACBemwFgXpsJYF6bAuBemwEgXpsBIF6bASBemwEgXpsBIF6bASBemwEgXpsBIF6bASBemwEgXpsBIF6bAKBemwogXps34F6bEuBemwAgXpsBIF6bACBemwAgXpsAIF6bPqBemxRgXpsAAAAAACBemwAgXpsAIF6bACBemwAgXpsAIF6bDSBemzXgXpsg4F6bAOBemwAgXpsAIF6bACBemwAgXpsAIF6bACBemwAgXpsAIF6bACBemwAgXpsAIF6bCSBemzegXpsSIF6bACBemwAgXpsAIF6bACBemwAgXps+oF6bFGBemwAAAAAAIF6bACBemwDgXpsAIF6bACBemwAgXpsgoF6bP+Bemx8gXpsAIF6bAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACBemwAgXpsJYF6bN6BemxIgXpsAAAAAAAAAAAAAAAAAAAAAACBemz6gXpsUYF6bAAAAAAAgXpsAIF6bDOBemxRgXpsAIF6bBOBemzQgXps5oF6bCiBemwAgXpsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIF6bACBemwlgXps3oF6bEiBemwAAAAAAAAAAAAAAAAAAAAAAIF6bPqBemxRgXpsAAAAAACBemwAgXpsSYF6bOKBemxagXpsZYF6bPyBemyZgXpsAoF6bACBemwAgXpsAAAAAACBemwAgXpsAIF6bACBemwAgXpsAIF6bACBemwAgXpsAIF6bCSBemzegXpsSIF6bAAAAAAAAAAAAAAAAAAAAAAAgXps+oF6bFGBemwAAAAAAIF6bACBemxGgXps+oF6bPWBemzzgXps+4F6bFGBemwAgXpsAYF6bACBemwAgXpsAIF6bACBemwAgXpsCIF6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';
+        icon.src = 'data:image/x-icon;base64,AAABAAEAICAAAAEAIACoEAAAFgAAACgAAAAgAAAAQAAAAAEAIAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXE1cXFzIXFxc81xcXN1cXFx0XFxcCVxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcXFwAXFxcAFxcXABcXFxXXFxc51xcXMpcXFyLXFxcsVxcXPFcXFyHXFxcCFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAXFxcAFxcXABcXFwAXFxcWFxcXOxcXFytXFxcGlxcXABcXFwIXFxcfVxcXPRcXFyJXFxcCFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcXFwAXFxcAFxcXFhcXFzsXFxcrVxcXBZcXFwAXFxcAFxcXABcXFwFXFxcfFxcXPRcXFyJXFxcCFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFxXXFxc7FxcXK1cXFwWXFxcAFxcXABcXFwAXFxcAFxcXABcXFwFXFxcfFxcXPRcXFyJXFxcCFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAXFxcUVxcXOhcXFytXFxcFlxcXABcXFwAXFxcAFxcXABcXFwAXFxcAFxcXABcXFwFXFxcfFxcXPRcXFyJXFxcCFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcXFzQXFxcxlxcXBlcXFwAXFxcAFxcXABcXFwCXFxcFVxcXARcXFwAXFxcAFxcXABcXFwFXFxce1xcXPRcXFyKXFxcCFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXPtcXFyAXFxcAFxcXABcXFwAXFxcAFxcXBpcXFzAXFxcelxcXAVcXFwAXFxcAFxcXABcXFwFXFxce1xcXPRcXFyKXFxcCVxcXABcXFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAXFxc6lxcXKNcXFwDXFxcAFxcXABcXFwAXFxcB1xcXIpcXFz0XFxce1xcXARcXFwAXFxcAFxcXABcXFwFXFxce1xcXPRcXFx9XFxcAlxcXAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcXFyGXFxc8VxcXGxcXFwBXFxcAFxcXABcXFwAXFxcCVxcXIpcXFz0XFxce1xcXARcXFwAXFxcAFxcXABcXFwEXFxcj1xcXOZcXFwpXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXA9cXFyYXFxc8lxcXGxcXFwCXFxcAFxcXABcXFwAXFxcCFxcXIpcXFz0XFxce1xcXAVcXFwAXFxcAFxcXABcXFw8XFxc8FxcXE1cXFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAXFxcAFxcXA1cXFyZXFxc8lxcXGxcXFwCXFxcAFxcXABcXFwAXFxcCFxcXIpcXFz0XFxce1xcXAVcXFwAXFxcAFxcXF1cXFzwXFxcPVxcXAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcXFwAXFxcAFxcXA5cXFyZXFxc8lxcXGxcXFwCXFxcAFxcXABcXFwAXFxcCFxcXIpcXFz0XFxce1xcXARcXFwOXFxcxVxcXLlcXFwOXFxcAFxcXABcXFwAXFxcAFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyZXFxc8lxcXGxcXFwCXFxcAFxcXABcXFwAXFxcCFxcXIpcXFz0XFxce1xcXAtcXFxRXFxcKVxc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XG5cXFwCXFxcAFxcXABcXFwAXFxcAFxcXABcXFwXXFxcrlxcXOxcXFxXXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyXXFxc8lxcXG5cXFwCXFxcAFxcXABcXFwAXFxcF1xcXK5cXFzsXFxcV1xcXABcXFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyXXFxc8lxcXG9cXFwEXFxcAFxcXBlcXFyuXFxc61xcXFdcXFwAXFxcAFxcXAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyVXFxc8VxcXKZcXFyCXFxcyFxcXOhcXFxWXFxcAFxcXABcXFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA5cXFyDXFxc51xcXPlcXFzNXFxcT1xcXABcXFwAXFxcAAAAAAAAAAAAwAP//4AB//8AAP//AAB//wAAP/8AAB//AAAP/wAAD/8AAA//AAAP/wAAD/8AAA//AAAAPwAAAB+AAAAPwAAAB+AAAAPwAAAB+AAAAPwAAAD/8AAA//AAAP/wAAD/8AAA//AAAP/wAAD/+AAA//wAAP/+AAD//wAA//+AAf//wAM=';
         icon.addEventListener('click', function (event) {
             var url = getSelection();
             var dotCount = (url.match(/\./g) || []).length;
@@ -1039,15 +1063,48 @@
         toolbar.appendChild(icon);
 
         // 更多按钮
+        var icon = document.createElement('img');
+        icon.id = 'qs-toolbar-icon-more';
+        icon.className = 'qs-toolbar-icon';
+        icon.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAMAAADDpiTIAAABYmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS40LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iCiAgIHRpZmY6T3JpZW50YXRpb249IjYiLz4KIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz7UGE7IAAACClBMVEX///9VYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBzg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79VYIBzg79VYIBzg79zg79VYIBzg79zg79zg79VYIBVYIBVYIBzg79VYIBVYIBzg79VYIBVYIBzg79z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';
+        icon.addEventListener('click', function (event) {
+            showMainBox();
+        }, false);
+        toolbar.appendChild(icon);
 
         window.quickSearchToolbar = toolbar;
     }
 
     // 显示划词工具条
     function showToolbar(event) {
-        window.quickSearchToolbar.style.top = event.pageY + 15 + 'px';
-        window.quickSearchToolbar.style.left = event.pageX - 50 + 'px';
-        window.quickSearchToolbar.style.display = 'block';
+        var toolbar = window.quickSearchToolbar;
+
+        if (toolbar.style.display == 'block') {
+            return;
+        }
+
+        toolbar.style.top = '-10000px';
+        toolbar.style.left = '-10000px';
+        toolbar.style.display = 'block';
+
+        var toolbarClientRect = toolbar.getBoundingClientRect();
+        var toolbarWidth = toolbarClientRect.right - toolbarClientRect.left;
+        var toolbarHeight = toolbarClientRect.bottom - toolbarClientRect.top;
+
+        var toolbarNewTop = event.pageY + 15;
+        var toolbarNewLeft = event.pageX - (toolbarWidth / 2);
+        var windowPos = getWindowPosition();
+        if (toolbarNewTop + toolbarHeight > windowPos.bottom) {
+            toolbarNewTop = event.pageY - toolbarHeight - 15;
+        }
+        if (toolbarNewLeft < windowPos.left) {
+            toolbarNewLeft = windowPos.left;
+        } else if (toolbarNewLeft + toolbarWidth > windowPos.right) {
+            toolbarNewLeft = windowPos.right - toolbarWidth;
+        }
+
+        toolbar.style.top = toolbarNewTop + 'px';
+        toolbar.style.left = toolbarNewLeft + 'px';
     }
 
     // 隐藏划词工具条
@@ -1078,60 +1135,67 @@
         searchBox.appendChild(searchInput);
 
         // 常用搜索引擎
-        var frequentBox = document.createElement('div');
-        frequentBox.id = 'qs-main-frequent-box';
-        frequentBox.className = 'qs-main-frequent-box';
-        mainBox.appendChild(frequentBox);
-        conf.frequentEngines.forEach((engine, index) => {
-            var icon = document.createElement('img');
-            icon.id = 'qs-main-frequent-icon-' + index;
-            icon.className = 'qs-main-frequent-icon';
-            icon.src = engine.icon;
-            icon.addEventListener('click', function (event) {
-                var query = searchInput.value.trim();
-                var url = engine.url.replace('%s', encodeURIComponent(query));
-                GM_openInTab(url);
-            }, false);
-            frequentBox.appendChild(icon);
-        });
+        if (conf.showFrequentEngines) {
+            var frequentBox = document.createElement('div');
+            frequentBox.id = 'qs-main-frequent-box';
+            frequentBox.className = 'qs-main-frequent-box';
+            mainBox.appendChild(frequentBox);
+            conf.frequentEngines.forEach((engine, index) => {
+                if (!engine.enable) return;
+                var icon = document.createElement('img');
+                icon.id = 'qs-main-frequent-icon-' + index;
+                icon.className = 'qs-main-frequent-icon';
+                icon.src = engine.icon;
+                icon.addEventListener('click', function (event) {
+                    var query = searchInput.value.trim();
+                    var url = engine.url.replace('%s', encodeURIComponent(query));
+                    GM_openInTab(url);
+                }, false);
+                frequentBox.appendChild(icon);
+            });
+        }
 
         // 分类搜索引擎
-        var classifiedBox = document.createElement('div');
-        classifiedBox.id = 'qs-main-classified-box';
-        classifiedBox.className = 'qs-main-classified-box';
-        mainBox.appendChild(classifiedBox);
-        conf.classifiedEngines.forEach((family, fIndex) => {
-            // 一个分类一列
-            var familyBox = document.createElement('div');
-            familyBox.id = 'qs-main-classified-family-box-' + fIndex;
-            familyBox.className = 'qs-main-classified-family-box';
-            classifiedBox.appendChild(familyBox);
-            // 分类标题
-            var familyTitle = document.createElement('div');
-            familyTitle.id = 'qs-main-classified-family-title-' + fIndex;
-            familyTitle.className = 'qs-main-classified-family-title';
-            familyTitle.textContent = family.name;
-            familyBox.appendChild(familyTitle);
-            family.engines.forEach((engine, eIndex) => {
-                // 搜索引擎
-                var engineBox = document.createElement('div');
-                engineBox.id = 'qs-main-classified-family-engine-' + fIndex + '-' + eIndex;
-                engineBox.className = 'qs-main-classified-family-engine';
-                familyBox.appendChild(engineBox);
-                // 搜索引擎icon
-                var engineIcon = document.createElement('img');
-                engineIcon.id = 'qs-main-classified-family-engine-icon-' + fIndex + '-' + eIndex;
-                engineIcon.className = 'qs-main-classified-family-engine-icon';
-                engineIcon.src = engine.icon;
-                engineBox.appendChild(engineIcon);
-                // 搜索引擎name
-                var engineName = document.createElement('div');
-                engineName.id = 'qs-main-classified-family-engine-name-' + fIndex + '-' + eIndex;
-                engineName.className = 'qs-main-classified-family-engine-name';
-                engineName.textContent = engine.name;
-                engineBox.appendChild(engineName);
+        if (conf.showClassifiedEngines) {
+            var classifiedBox = document.createElement('div');
+            classifiedBox.id = 'qs-main-classified-box';
+            classifiedBox.className = 'qs-main-classified-box';
+            mainBox.appendChild(classifiedBox);
+            conf.classifiedEngines.forEach((family, fIndex) => {
+                if (!family.enable) return;
+                // 一个分类一列
+                var familyBox = document.createElement('div');
+                familyBox.id = 'qs-main-classified-family-box-' + fIndex;
+                familyBox.className = 'qs-main-classified-family-box';
+                classifiedBox.appendChild(familyBox);
+                // 分类标题
+                var familyTitle = document.createElement('div');
+                familyTitle.id = 'qs-main-classified-family-title-' + fIndex;
+                familyTitle.className = 'qs-main-classified-family-title';
+                familyTitle.textContent = family.name;
+                familyBox.appendChild(familyTitle);
+                family.engines.forEach((engine, eIndex) => {
+                    if (!engine.enable) return;
+                    // 搜索引擎
+                    var engineBox = document.createElement('div');
+                    engineBox.id = 'qs-main-classified-family-engine-' + fIndex + '-' + eIndex;
+                    engineBox.className = 'qs-main-classified-family-engine';
+                    familyBox.appendChild(engineBox);
+                    // 搜索引擎icon
+                    var engineIcon = document.createElement('img');
+                    engineIcon.id = 'qs-main-classified-family-engine-icon-' + fIndex + '-' + eIndex;
+                    engineIcon.className = 'qs-main-classified-family-engine-icon';
+                    engineIcon.src = engine.icon;
+                    engineBox.appendChild(engineIcon);
+                    // 搜索引擎name
+                    var engineName = document.createElement('span');
+                    engineName.id = 'qs-main-classified-family-engine-name-' + fIndex + '-' + eIndex;
+                    engineName.className = 'qs-main-classified-family-engine-name';
+                    engineName.textContent = engine.name;
+                    engineBox.appendChild(engineName);
+                });
             });
-        });
+        }
 
         window.quickSearchMainBox = mainBox;
     }
@@ -1156,11 +1220,12 @@
     ///////////////////////////////////////////////////////////////////
 
     loadSheet();
-    createToolbar();
+    if (conf.showToolbar) {
+        createToolbar();
+    }
     createMainBox();
 
     window.addEventListener('mouseup', function (event) {
-        console.log('快搜: mouseup: ' + getSelection());
         // TODO 这里逻辑有问题
         if (getSelection()) {
             showToolbar(event);
@@ -1178,6 +1243,4 @@
             }
         }
     }, false);
-
-    console.log('快搜: 初始化完成');
 })();
