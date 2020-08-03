@@ -735,175 +735,179 @@
     ///////////////////////////////////////////////////////////////////
 
     const sheet = `
+        /*
+           注意: 为了避免网页style对该工具的影响, 所有样式均进行初始化并加入!important, 
+           js中设置style时也要注意将其设置为important, 否则不能生效.
+        */
         /* 划词工具条 */
         .qs-toolbar {
             /* 初始化所有style, 避免被网页本身的style影响 */
-            all: initial;
-            position: absolute;
-            display: block;
-            height: 26px;
-            padding: 2px;
-            white-space: nowrap;
-            border: 1px solid #F5F5F5;
-            box-shadow: 0px 0px 2px #BBB;
-            background-color: #FFF;
-            z-index: 10000;
+            all: initial !important;
+            position: absolute !important;
+            display: block !important;
+            height: 26px !important;
+            padding: 2px !important;
+            white-space: nowrap !important;
+            border: 1px solid #F5F5F5 !important;
+            box-shadow: 0px 0px 2px #BBB !important;
+            background-color: #FFF !important;
+            z-index: 10000 !important;
         }
         .qs-toolbar-icon {
-            all: initial;
-            display: inline-block;
-            margin: 0px;
-            padding: 2px;
-            width: 20px;
-            height: 20px;
-            border: 1px solid #FFF;
-            cursor: pointer;
+            all: initial !important;
+            display: inline-block !important;
+            margin: 0px !important;
+            padding: 2px !important;
+            width: 20px !important;
+            height: 20px !important;
+            border: 1px solid #FFF !important;
+            cursor: pointer !important;
         }
         .qs-toolbar-icon:hover {
-            border: 1px solid #CCC;
+            border: 1px solid #CCC !important;
         }
 
         /* 主窗口 */
         .qs-mainbox {
-            all: initial;
-            position: fixed;
-            display: block;
-            text-align: center;
-            overflow: scroll;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: fit-content;
-            min-width: 500px;
-            max-width: 1400px;
-            min-height: 75px;
-            max-height: 650px;
-            padding: 10px;
-            border: 1px solid #F5F5F5;
-            box-shadow: 0px 0px 6px #BBB;
-            border-radius: 10px;
-            background-color: #FFF;
-            opacity: 1;
-            z-index: 20000;
+            all: initial !important;
+            position: fixed !important;
+            display: block !important;
+            text-align: center !important;
+            overflow: scroll !important;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: fit-content !important;
+            min-width: 500px !important;
+            max-width: 1400px !important;
+            min-height: 75px !important;
+            max-height: 650px !important;
+            padding: 10px !important;
+            border: 1px solid #F5F5F5 !important;
+            box-shadow: 0px 0px 6px #BBB !important;
+            border-radius: 10px !important;
+            background-color: #FFF !important;
+            opacity: 1 !important;
+            z-index: 20000 !important;
         }
         /* 主窗口搜索框 */
         .qs-main-search-box {
-            all: initial;
-            display: block;
-            text-align: center;
-            width: 100%;
-            margin: 5px 0px;
-            border: 0px;
+            all: initial !important;
+            display: block !important;
+            text-align: center !important;
+            width: 100% !important;
+            margin: 5px 0px !important;
+            border: 0px !important;
         }
         .qs-main-search-input {
-            all: initial;
-            text-align: left;
-            width: 80%;
-            min-width: 400px;
-            max-width: 600px;
-            height: 40px;
-            padding: 0px 13px;
-            font: 16px/18px arial;
-            border: 2px solid #C4C7CE;
-            border-radius: 10px;
-            outline: none;
+            all: initial !important;
+            text-align: left !important;
+            width: 80% !important;
+            min-width: 400px !important;
+            max-width: 600px !important;
+            height: 40px !important;
+            padding: 0px 13px !important;
+            font: 16px/18px arial !important;
+            border: 2px solid #C4C7CE !important;
+            border-radius: 10px !important;
+            outline: none !important;
         }
         .qs-main-search-input:hover {
-            border-color: #4E71F2;
+            border-color: #4E71F2 !important;
         }
         .qs-main-search-input::placeholder {
-            color: #EEE;
-            opacity: 1;
+            color: #EEE !important;
+            opacity: 1 !important;
         }
         /* 主窗口常用搜索引擎列表 */
         .qs-main-frequent-box {
-            all: initial;
-            display: block;
-            text-align: center;
-            width: 100%;
-            height: 38px;
-            margin: 15px 0px 5px 0px;
-            white-space: nowrap;
-            border: 0px;
+            all: initial !important;
+            display: block !important;
+            text-align: center !important;
+            width: 100% !important;
+            height: 38px !important;
+            margin: 15px 0px 5px 0px !important;
+            white-space: nowrap !important;
+            border: 0px !important;
         }
         .qs-main-frequent-icon {
-            all: initial;
-            display: inline-block;
-            width: 28px;
-            height: 28px;
-            margin: 0px 6px;
-            padding: 3px;
-            border: 2px solid #FFF;
-            cursor: pointer;
+            all: initial !important;
+            display: inline-block !important;
+            width: 28px !important;
+            height: 28px !important;
+            margin: 0px 6px !important;
+            padding: 3px !important;
+            border: 2px solid #FFF !important;
+            cursor: pointer !important;
         }
         .qs-main-frequent-icon:hover {
-            border: 2px solid #CCC;
+            border: 2px solid #CCC !important;
         }
         /* 主窗口分类搜索引擎列表 */
         .qs-main-classified-box {
-            all: initial;
-            display: block;
-            text-align: center;
-            width: 100%;
-            margin-top: 15px;
-            padding-top: 5px;
-            border: 0px;
-            border-top: 1px solid #DDD;
+            all: initial !important;
+            display: block !important;
+            text-align: center !important;
+            width: 100% !important;
+            margin-top: 15px !important;
+            padding-top: 5px !important;
+            border: 0px !important;
+            border-top: 1px solid #DDD !important;
         }
         .qs-main-classified-family-box {
-            all: initial;
-            display: inline-block;
-            text-align: left;
-            vertical-align: top;
-            min-width: 50px;
-            max-width: 150px;
-            height: 100%;
-            margin: 5px 3px;
-            border: 0px;
+            all: initial !important;
+            display: inline-block !important;
+            text-align: left !important;
+            vertical-align: top !important;
+            min-width: 50px !important;
+            max-width: 150px !important;
+            height: 100% !important;
+            margin: 5px 3px !important;
+            border: 0px !important;
         }
         .qs-main-classified-family-title {
-            all: initial;
-            display: block;
-            text-align: left;
-            margin: 5px 4px;
-            font-size: 18px;
-            font-weight: 300;
-            color: #777;
-            border: 0px;
+            all: initial !important;
+            display: block !important;
+            text-align: left !important;
+            margin: 5px 4px !important;
+            font-size: 18px !important;
+            font-weight: 300 !important;
+            color: #777 !important;
+            border: 0px !important;
         }
         .qs-main-classified-family-engine {
-            all: initial;
-            display: block;
-            text-align: left;
-            vertical-align: middle;
-            height: 26px;
-            border: 2px solid #FFF;
-            cursor: pointer;
+            all: initial !important;
+            display: block !important;
+            text-align: left !important;
+            vertical-align: middle !important;
+            height: 26px !important;
+            border: 2px solid #FFF !important;
+            cursor: pointer !important;
         }
         .qs-main-classified-family-engine:hover {
-            border: 2px solid #CCC;
+            border: 2px solid #CCC !important;
         }
         .qs-main-classified-family-engine-icon {
-            all: initial;
-            display: inline-block;
-            vertical-align: middle;
-            width: 16px;
-            height: 16px;
-            margin: 0px 3px 0px 2px;
-            border: 0px;
-            cursor: pointer;
+            all: initial !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            width: 16px !important;
+            height: 16px !important;
+            margin: 0px 3px 0px 2px !important;
+            border: 0px !important;
+            cursor: pointer !important;
         }
         .qs-main-classified-family-engine-name {
-            all: initial;
-            display: inline-block;
-            vertical-align: middle;
-            margin-right: 2px;
-            font-size: 13px;
-            font-family: arial,sans-serif;
-            font-weight: 400;
-            color: #5F5F5F;
-            border: 0px;
-            cursor: pointer;
+            all: initial !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            margin-right: 2px !important;
+            font-size: 13px !important;
+            font-family: arial,sans-serif !important;
+            font-weight: 400 !important;
+            color: #5F5F5F !important;
+            border: 0px !important;
+            cursor: pointer !important;
         }
         .qs-main-help-info-box {
             all: initial !important;
@@ -1139,7 +1143,7 @@
         var toolbar = document.createElement('div');
         toolbar.id = 'qs-toolbar';
         toolbar.className = 'qs-toolbar';
-        toolbar.style.display = 'none';
+        toolbar.style.setProperty('display', 'none', 'important');
         document.body.appendChild(toolbar);
 
         // 常用搜索引擎按钮
@@ -1204,9 +1208,9 @@
 
         var toolbar = quickSearchToolbar;
 
-        toolbar.style.top = '-10000px';
-        toolbar.style.left = '-10000px';
-        toolbar.style.display = 'block';
+        toolbar.style.setProperty('top', '-10000px', 'important');
+        toolbar.style.setProperty('left', '-10000px', 'important');
+        toolbar.style.setProperty('display', 'block', 'important');
 
         var toolbarClientRect = toolbar.getBoundingClientRect();
         var toolbarWidth = toolbarClientRect.right - toolbarClientRect.left;
@@ -1224,13 +1228,13 @@
             toolbarNewLeft = windowPos.right - toolbarWidth;
         }
 
-        toolbar.style.top = toolbarNewTop + 'px';
-        toolbar.style.left = toolbarNewLeft + 'px';
+        toolbar.style.setProperty('top', toolbarNewTop + 'px', 'important');
+        toolbar.style.setProperty('left', toolbarNewLeft + 'px', 'important');
     }
 
     // 隐藏划词工具条
     function hideToolbar() {
-        quickSearchToolbar.style.display = 'none';
+        quickSearchToolbar.style.setProperty('display', 'none', 'important');
     }
 
     // 创建主窗口
@@ -1239,7 +1243,7 @@
         var mainBox = document.createElement('div');
         mainBox.id = 'qs-mainbox';
         mainBox.className = 'qs-mainbox';
-        mainBox.style.display = 'none';
+        mainBox.style.setProperty('display', 'none', 'important');
         document.body.appendChild(mainBox);
 
         // 搜索框
@@ -1362,12 +1366,12 @@
         if (isMainBoxVisual()) {
             return;
         }
-        quickSearchMainBox.style.display = 'block';
+        quickSearchMainBox.style.setProperty('display', 'block', 'important');
     }
 
     // 隐藏主窗口
     function hideMainBox() {
-        quickSearchMainBox.style.display = 'none';
+        quickSearchMainBox.style.setProperty('display', 'none', 'important');
     }
 
     // 创建设置窗口
