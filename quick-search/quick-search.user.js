@@ -1122,11 +1122,12 @@
 
     // 显示划词工具条
     function showToolbar(event) {
-        var toolbar = quickSearchToolbar;
-
-        if (toolbar.style.display == 'block') {
+        
+        if (isToolbarVisual()) {
             return;
         }
+
+        var toolbar = quickSearchToolbar;
 
         toolbar.style.top = '-10000px';
         toolbar.style.left = '-10000px';
