@@ -19,7 +19,8 @@
     // 配置
     ///////////////////////////////////////////////////////////////////
 
-    var conf = {
+    const defaultConf = {
+        enableOnInput: true,        // 是否在input/textarea上启用quick search, 默认当在input/textarea中选中文本时启用
         showToolbar: true,          // 显示划词工具条
         showPlaceholder: true,      // 显示使用方式提示信息
         showFrequentEngines: true,  // 显示常用搜索引擎
@@ -28,29 +29,29 @@
             name: '百度',
             url: 'https://www.baidu.com/s?wd=%s&ie=utf-8',
         },
-        hotkeyEngines: [            // 绑定快捷键的搜索引擎列表
-            {
-                name: '百度',
-                url: 'https://www.baidu.com/s?wd=%s&ie=utf-8',
-                hotkeys: ['q', 's', 'b'],
-                enable: true,
-            },
+        hotkeyEngines: [            // 绑定快捷键的搜索引擎列表(s/d/f键被脚本征用, 请勿使用)
             {
                 name: '百度百科',
                 url: 'https://baike.baidu.com/search/word?pic=1&sug=1&word=%s',
-                hotkeys: ['w'],
+                hotkey: 'w',
                 enable: true,
             },
             {
                 name: '百度翻译',
                 url: 'https://fanyi.baidu.com/#auto/zh/%s',
-                hotkeys: ['e'],
+                hotkey: 'e',
+                enable: true,
+            },
+            {
+                name: '百度',
+                url: 'https://www.baidu.com/s?wd=%s&ie=utf-8',
+                hotkey: 'b',
                 enable: true,
             },
             {
                 name: 'Google',
                 url: 'https://www.google.com/search?q=%s&ie=utf-8&oe=utf-8',
-                hotkeys: ['g'],
+                hotkey: 'g',
                 enable: true,
             },
         ],
@@ -731,7 +732,7 @@
     // css样式
     ///////////////////////////////////////////////////////////////////
 
-    var sheet = `
+    const sheet = `
         /* 划词工具条 */
         .qs-toolbar {
             /* 初始化所有style, 避免被网页本身的style影响 */
@@ -904,6 +905,18 @@
     `;
 
     ///////////////////////////////////////////////////////////////////
+    // 全局变量
+    ///////////////////////////////////////////////////////////////////
+    
+    var conf = defaultConf;
+    var enableQuickSearch = true;       // 是否在当前页面启用quick search
+    var lockBackground = false;         // 是否锁定后台打开搜索结果新标签页
+    
+    var quickSearchToolbar = null;      // quick search 划词工具条
+    var quickSearchMainBox = null;      // quick search 主窗口
+    var quickSearchSettingBox = null;   // quick search 设置窗口
+
+    ///////////////////////////////////////////////////////////////////
     // 功能函数
     ///////////////////////////////////////////////////////////////////
 
@@ -931,21 +944,25 @@
         return window.getSelection().toString().trim();
     }
 
-    // 获取当前页面匹配的 搜索引擎 及 同类别的搜索引擎列表.
+    // 获取当前页面匹配的 搜索引擎 及 其在同类别的搜索引擎列表中的索引 及 同类别的搜索引擎列表.
     // TODO 目前只是简单地匹配域名, 待完善.
     function getMatchedEngineInfo() {
         var hostname = window.location.hostname;
         hostname = hostname.replace(/^(www\.)/, '');
 
-        for (var classEngines of conf.classifiedEngines) {
-            for (var engine of classEngines.engines) {
+        conf.classifiedEngines.forEach((classEngines) => {
+            classEngines.engines.forEach((engine, index) => {
                 var engineHostname = new URL(engine.url).hostname;
                 engineHostname = engineHostname.replace(/^(www\.)/, '');
                 if (hostname == engineHostname) {
-                    return { engine: engine, classEngines: classEngines };
+                    return {
+                        engine: engine,
+                        index: index,
+                        classEngines: classEngines
+                    };
                 }
-            }
-        }
+            });
+        });
 
         return null;
     }
@@ -1007,6 +1024,29 @@
         }
 
         return null;
+    }
+
+    // 判断是否允许响应当前按键或动作
+    // 输入为: event - 当前事件, selection - 当前选中的文本
+    function isAllow(event, selection) {
+        if (!enableQuickSearch) {
+            return false;
+        }
+        var target = event.target;
+        if (quickSearchToolbar && quickSearchToolbar.contains(target) 
+        || quickSearchMainBox && quickSearchMainBox.contains(target)
+        || quickSearchSettingBox && quickSearchSettingBox.contains(target)) {
+            return true;
+        }
+        if (target.tagName == 'INPUT' || target.tagName == 'TEXTAREA') {
+            if (!conf.enableOnInput) {
+                return false;
+            }
+            if (!selection) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // 加载css样式
@@ -1072,12 +1112,12 @@
         }, false);
         toolbar.appendChild(icon);
 
-        window.quickSearchToolbar = toolbar;
+        quickSearchToolbar = toolbar;
     }
 
     // 显示划词工具条
     function showToolbar(event) {
-        var toolbar = window.quickSearchToolbar;
+        var toolbar = quickSearchToolbar;
 
         if (toolbar.style.display == 'block') {
             return;
@@ -1109,7 +1149,7 @@
 
     // 隐藏划词工具条
     function hideToolbar() {
-        window.quickSearchToolbar.style.display = 'none';
+        quickSearchToolbar.style.display = 'none';
     }
 
     // 创建主窗口
@@ -1197,22 +1237,22 @@
             });
         }
 
-        window.quickSearchMainBox = mainBox;
+        quickSearchMainBox = mainBox;
     }
 
     // 主窗口是否处于显示状态
     function isMainBoxVisual() {
-        return window.quickSearchMainBox.style.display == 'block';
+        return quickSearchMainBox.style.display == 'block';
     }
 
     // 显示主窗口
     function showMainBox() {
-        window.quickSearchMainBox.style.display = 'block';
+        quickSearchMainBox.style.display = 'block';
     }
 
     // 隐藏主窗口
     function hideMainBox() {
-        window.quickSearchMainBox.style.display = 'none';
+        quickSearchMainBox.style.display = 'none';
     }
 
     ///////////////////////////////////////////////////////////////////
