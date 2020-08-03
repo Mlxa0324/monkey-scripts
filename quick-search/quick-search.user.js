@@ -812,8 +812,12 @@
             border-radius: 10px !important;
             outline: none !important;
         }
-        .qs-main-search-input:hover {
+        .qs-main-search-input:hover, .qs-main-search-input:focus {
             border-color: #4E71F2 !important;
+        }
+        .qs-main-search-input::selection {
+            color: #FFF !important;
+            background-color: #425d78 !important;
         }
         .qs-main-search-input::placeholder {
             color: #EEE !important;
@@ -989,12 +993,14 @@
     ///////////////////////////////////////////////////////////////////
     
     var conf = GM_getValue('qs-saved-conf', defaultConf);
-    var enableQuickSearch = true;       // 是否在当前页面启用quick search
-    var lockBackground = false;         // 是否锁定后台打开搜索结果新标签页
+    var enableQuickSearch = true;           // 是否在当前页面启用quick search
+    var lockBackground = false;             // 是否锁定后台打开搜索结果新标签页
 
-    var quickSearchToolbar = null;      // quick search 划词工具条
-    var quickSearchMainBox = null;      // quick search 主窗口
-    var quickSearchSettingBox = null;   // quick search 设置窗口
+    var quickSearchToolbar = null;          // quick search 划词工具条
+    var quickSearchMainBox = null;          // quick search 主窗口
+    var quickSearchSettingBox = null;       // quick search 设置窗口
+    var quickSearchSearchInput = null;      // quick search 主窗口搜索框
+    var quickSearchConfigTextarea = null;   // quick search 设置窗口配置框
 
     ///////////////////////////////////////////////////////////////////
     // 功能函数
@@ -1025,6 +1031,7 @@
     }
 
     // 获取当前页面匹配的 搜索引擎 及 其在同类别的搜索引擎列表中的索引 及 同类别的搜索引擎列表.
+    //
     // TODO 目前只是简单地匹配域名, 待完善.
     function getMatchedEngineInfo() {
         var hostname = window.location.hostname;
@@ -1068,8 +1075,10 @@
     // 获取当前页面url中的搜索词
     //
     // 如果当前页面在配置的搜索引擎列表中, 尝试从url中解析参数, 分为engine.url中含有问号(?)和不含问号(?)两种情况.
-    // 如果没有解析到或者当前页面不在配置的搜索引擎列表中, 尝试获取文本在url中完整出现的input/textarea的值.
+    // 如果没有解析到或者当前页面不在配置的搜索引擎列表中, 尝试获取文本(纯数字除外)在url中完整出现的input/textarea的值.
     // 如果还是没有, 则认为当前页面url中没有搜索词.
+    //
+    // TODO 可优化. 将url按照 ? # / 拆分为part, 然后判断哪个input/textarea的值与part完全相等, 当然纯数字依然除外.
     function getUrlQuery() {
 
         var engineInfo = getMatchedEngineInfo();
@@ -1093,13 +1102,16 @@
             }
         }
 
-        // 尝试获取文本在url中完整出现的input/textarea的值
+        // 尝试获取文本(纯数字除外)在url中完整出现的input/textarea的值
         var eles = document.querySelectorAll('input, textarea');
         for (var ele of eles) {
-            var encodedValue = encodeURIComponent(ele.value.trim());
-            var urlTail = removeDomain(window.location.href);
-            if (encodedValue && urlTail.includes(encodedValue)) {
-                return encodedValue;
+            var eleValue = ele.value.trim();
+            if (eleValue && !/^\d+$/.test(eleValue)) {
+                var encodedEleValue = encodeURIComponent(eleValue);
+                var urlTail = removeDomain(window.location.href);
+                if (urlTail.includes(encodedEleValue)) {
+                    return encodedEleValue;
+                }
             }
         }
 
@@ -1354,6 +1366,7 @@
         helpInfoBox.appendChild(settingLink);
 
         quickSearchMainBox = mainBox;
+        quickSearchSearchInput = searchInput;
     }
 
     // 主窗口是否处于显示状态
@@ -1366,7 +1379,19 @@
         if (isMainBoxVisual()) {
             return;
         }
+        
+        // 设置搜索框内容, 优先级 选中文本 > 搜索框已有文本 > 当前页面搜索词
+        var selection = getSelection();
+        if (selection) {
+            quickSearchSearchInput.value = selection;
+        } else if (!quickSearchSearchInput.value.trim()) {
+            quickSearchSearchInput.value = getUrlQuery();
+        }
+
         quickSearchMainBox.style.setProperty('display', 'block', 'important');
+
+        // 选中搜索框文本
+        quickSearchSearchInput.select();
     }
 
     // 隐藏主窗口
@@ -1428,6 +1453,7 @@
         buttonBar.appendChild(saveButton);
 
         quickSearchSettingBox = settingBox;
+        quickSearchConfigTextarea = configTextarea;
     }
 
     // 设置窗口是否处于显示状态
@@ -1441,7 +1467,7 @@
             return;
         }
         var confStr = JSON.stringify(conf, null, 4);
-        quickSearchSettingBox.querySelector('#qs-setting-config-textarea').value = confStr;
+        quickSearchConfigTextarea.value = confStr;
         quickSearchSettingBox.style.setProperty('display', 'block', 'important');
     }
 
@@ -1472,6 +1498,7 @@
 
     window.addEventListener('keydown', function (event) {
         if (event.key == 'f') {
+            event.preventDefault();
             if (!isMainBoxVisual()) {
                 showMainBox();
             } else {
