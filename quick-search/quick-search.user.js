@@ -9,6 +9,8 @@
 // @icon        data:image/x-icon;base64,AAABAAEAICAAAAEAIACoEAAAFgAAACgAAAAgAAAAQAAAAAEAIAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobACEaGwAhGhsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIRobACEaGwAhGhsAIRobACEaGwAhGhsAIRobAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACEaGwAhGhsAIRobAyEaG0shGhtzIRobMSEaGwEhGhsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobACEaGwQhGhtkIRob3CEaG/QhGhvLIRobGyEaGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIRobACEaGwAhGhsFIRobZSEaG9AhGhvhIRob6iEaG+AhGhsqIRobAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACEaGwAhGhsAIRobBSEaG2IhGhvDIRob0CEaG9khGhvmIRobuCEaGxYhGhsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobACEaGwUhGhtaIRobtCEaG8EhGhvLIRobziEaG5AhGhslIRobACEaGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIRobACEaGwAhGhsDIRobUSEaG6QhGhuxIRobvCEaG6YhGhtNIRobByEaGwAhGhsAIRobAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobACEaGwAhGhsAIRobACEaGwAhGhsAIRobACEaGwAhGhsAIRobACEaGwAhGhsAIRobASEaG0ghGhuaIRobpCEaG6ohGht1IRobHSEaGwAhGhsAIRobACEaGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIRobACEaGwAhGhsAIRobAiEaGxghGhszIRobRCEaG0ghGhtCIRobKyEaGw8hGhsAIRobACEaGwAhGhsqIRobnyEaG6ghGhuaIRobTCEaGwchGhsAIRobACEaGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACEaGwAhGhsAIRobACEaGy0hGht3IRoboyEaG7EhGhu1IRobtiEaG7UhGhuwIRobmSEaG18hGhsYIRobACEaGzEhGhuwIRobmCEaGzQhGhsAIRobACEaGwAhGhsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobACEaGwQhGhtYIRobsSEaG78hGhu5IRobryEaG6chGhunIRobriEaG7chGhu9IRobwSEaG6MhGhs/IRobDiEaG2whGhsuIRobACEaGwAhGhsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIRobACEaGwAhGhsAIRobVyEaG8AhGhvBIRoboiEaG2ghGhs+IRobKyEaGyshGhs9IRobZiEaG58hGhu+IRobxyEaG70hGhtOIRobAyEaGwAhGhsAIRobAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobACEaGyohGhu4IRobxSEaG4EhGhsgIRobACEaGwAhGhsAIRobACEaGwAhGhsAIRobHiEaG38hGhvCIRobzSEaG74hGhs0IRobACEaGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACEaGwAhGhsAIRobeCEaG9AhGhuFIRobDiEaGwAhGhsAIRobACEaGwAhGhsAIRobACEaGwAhGhsAIRobDiEaG4UhGhvMIRob1SEaG5ohGhsKIRobAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIRobACEaGxMhGhuwIRobtyEaGyIhGhsAIRobACEaGwAAAAAAAAAAAAAAAAAAAAAAIRobACEaGwAhGhsAIRobIiEaG7MhGhvVIRob0SEaGzkhGhsAIRobAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobKyEaG8shGhuAIRobACEaGwAhGhsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIRobACEaGwAhGhsAIRobdyEaG9chGhvfIRobbSEaGwAhGhsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACEaGwAhGhsnIRobySEaG1whGhsAIRobAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIRobACEaGwAhGhtJIRob1iEaG+MhGhuLIRobACEaGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIRobACEaGwkhGhugIRobWSEaGwAhGhsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobACEaGzohGhvVIRob5iEaG48hGhsAIRobAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobACEaG1UhGhtlIRobACEaGwAhGhsAIRobAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACEaGwAhGhsAIRobSSEaG90hGhvpIRobeiEaGwAhGhsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACEaGwAhGhsAIRobDiEaGzwhGhsMIRobASEaGwAhGhsAIRobAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobACEaGwAhGhuDIRob5yEaG+chGhtPIRobACEaGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIRobACEaGwAhGhstIRobpSEaG7IhGht1IRobDiEaGwAhGhsAIRobAAAAAAAhGhsAIRobACEaGwAhGhsAIRobPiEaG9IhGhvtIRobyCEaGxohGhsAIRobAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobACEaG4QhGhvxIRob6iEaG+MhGhuMIRobFCEaGwAhGhsAIRobACEaGwAhGhsAIRobACEaG0AhGhvEIRob7SEaG+8hGhtxIRobACEaGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACEaGwAhGhsAIRobmSEaG/chGhvtIRob6iEaG+YhGhusIRobRSEaGxIhGhsIIRobDyEaGzAhGht/IRob1yEaG+8hGhv0IRobqiEaGxIhGhsAIRobAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIRobACEaGwAhGhtGIRobzyEaG/UhGhvzIRob7iEaG+4hGhvhIRobwCEaG64hGhu8IRob2yEaG+8hGhvzIRob9CEaG60hGhsfIRobACEaGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobACEaGwAhGhsgIRobfCEaG9IhGhv1IRob9yEaG/QhGhv1IRob9iEaG/chGhv4IRob9SEaG9khGht7IRobEyEaGwAhGhsAIRobAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhGhsAIRobACEaGwAhGhsAIRobHyEaG2khGhuyIRob1CEaG94hGhvbIRobzSEaG6ohGhttIRobJiEaGwAhGhsAIRobACEaGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIRobACEaGwAhGhsAIRobACEaGwghGhsaIRobIyEaGyAhGhsUIRobBSEaGwAhGhsAIRobACEaGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACEaGwAhGhsAIRobACEaGwAhGhsAIRobACEaGwAhGhsAIRobACEaGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////4f///8B///+Af///AH///gB///wAf//4AH//8AB/AAAA/gAAA/wAAAf4AAAf8AAAP/AAAH/wAAB/8A8AP/AfgD/wP8A/8D/AP/APwD/wB4A/8AIAP/AAAH/wAAB/8AAA//AAAP/4AAH//gAH//+AH////////////8=
 // @match       *://*/*
 // @grant       GM_openInTab
+// @grant       GM_getValue
+// @grant       GM_setValue
 // @run-at      document-end
 // ==/UserScript==
 
@@ -760,6 +762,7 @@
         .qs-toolbar-icon:hover {
             border: 1px solid #CCC;
         }
+
         /* 主窗口 */
         .qs-mainbox {
             all: initial;
@@ -781,7 +784,7 @@
             border-radius: 10px;
             background-color: #FFF;
             opacity: 1;
-            z-index: 10000;
+            z-index: 20000;
         }
         /* 主窗口搜索框 */
         .qs-main-search-box {
@@ -902,13 +905,86 @@
             border: 0px;
             cursor: pointer;
         }
+        .qs-main-help-info-box {
+            all: initial !important;
+            display: block !important;
+            text-align: center !important;
+            width: 100% !important;
+            margin: 5px 0px !important;
+            border: 0px !important;
+        }
+        .qs-main-help-info-item {
+            all: initial !important;
+            margin: 0px 10px !important;
+            font-size: 8px !important;
+            color: #DDD !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+        }
+        .qs-main-help-info-item:hover {
+            color: #4E71F2 !important;
+        }
+
+        /* 设置窗口 */
+        .qs-setting-box {
+            all: initial !important;
+            position: fixed !important;
+            display: block !important;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: fit-content !important;
+            height: fit-content !important;
+            padding: 10px !important;
+            border: 1px solid #F5F5F5 !important;
+            box-shadow: 0px 0px 6px #BBB !important;
+            border-radius: 10px !important;
+            background-color: #FFF !important;
+            opacity: 1 !important;
+            z-index: 30000 !important;
+        }
+        .qs-setting-config-textarea {
+            all: initial !important;
+            display: block !important;
+            width: 800px !important;
+            height: 650px !important;
+            padding: 5px !important;
+            white-space: pre !important;
+            overflow-wrap: normal !important;
+            font: 400 13.3333px Arial !important;
+            border: 1px solid #CCC !important;
+            border-radius: 5px !important;
+        }
+        .qs-setting-config-textarea:focus {
+            border-color: #4E71F2 !important;
+        }
+        .qs-setting-button-bar {
+            all: initial !important;
+            display: block !important;
+            width: 100% !important;
+            text-align: right !important;
+            border: 0px !important;
+        }
+        .qs-setting-button {
+            all: initial !important;
+            display: inline-block !important;
+            width: 60px !important;
+            margin: 10px 0px 5px 20px !important;
+            font-size: 13px !important;
+            color: #555 !important;
+            border: 0px !important;
+            cursor: pointer !important;
+        }
+        .qs-setting-button:hover {
+            color: #4E71F2 !important;
+        }
     `;
 
     ///////////////////////////////////////////////////////////////////
     // 全局变量
     ///////////////////////////////////////////////////////////////////
     
-    var conf = defaultConf;
+    var conf = GM_getValue('qs-saved-conf', defaultConf);
     var enableQuickSearch = true;       // 是否在当前页面启用quick search
     var lockBackground = false;         // 是否锁定后台打开搜索结果新标签页
 
@@ -1034,8 +1110,7 @@
         }
         var target = event.target;
         if (quickSearchToolbar && quickSearchToolbar.contains(target) 
-        || quickSearchMainBox && quickSearchMainBox.contains(target)
-        || quickSearchSettingBox && quickSearchSettingBox.contains(target)) {
+        || quickSearchMainBox && quickSearchMainBox.contains(target)) {
             return true;
         }
         if (target.tagName == 'INPUT' || target.tagName == 'TEXTAREA') {
@@ -1122,7 +1197,7 @@
 
     // 显示划词工具条
     function showToolbar(event) {
-        
+
         if (isToolbarVisual()) {
             return;
         }
@@ -1243,6 +1318,37 @@
             });
         }
 
+        // 帮助信息
+        var helpInfoBox = document.createElement('div');
+        helpInfoBox.id = 'qs-main-help-info-box';
+        helpInfoBox.className = 'qs-main-help-info-box';
+        mainBox.appendChild(helpInfoBox);
+        // 主页
+        var homeLink = document.createElement('a');
+        homeLink.id = 'qs-main-help-info-home';
+        homeLink.className = 'qs-main-help-info-item';
+        homeLink.textContent = '主页';
+        homeLink.href = 'https://github.com/smallx/monkey-scripts/tree/master/quick-search';
+        homeLink.target = '_blank';
+        helpInfoBox.appendChild(homeLink);
+        // 帮助
+        var helpLink = document.createElement('a');
+        helpLink.id = 'qs-main-help-info-help';
+        helpLink.className = 'qs-main-help-info-item';
+        helpLink.textContent = '帮助';
+        helpLink.href = 'https://github.com/smallx/monkey-scripts/tree/master/quick-search/README.md';
+        helpLink.target = '_blank';
+        helpInfoBox.appendChild(helpLink);
+        // 设置
+        var settingLink = document.createElement('a');
+        settingLink.id = 'qs-main-help-info-setting';
+        settingLink.className = 'qs-main-help-info-item';
+        settingLink.textContent = '设置';
+        settingLink.onclick = function (event) {
+            showSettingBox();
+        };
+        helpInfoBox.appendChild(settingLink);
+
         quickSearchMainBox = mainBox;
     }
 
@@ -1253,12 +1359,91 @@
 
     // 显示主窗口
     function showMainBox() {
+        if (isMainBoxVisual()) {
+            return;
+        }
         quickSearchMainBox.style.display = 'block';
     }
 
     // 隐藏主窗口
     function hideMainBox() {
         quickSearchMainBox.style.display = 'none';
+    }
+
+    // 创建设置窗口
+    function createSettingBox() {
+        // 设置窗口container
+        var settingBox = document.createElement('div');
+        settingBox.id = 'qs-setting-box';
+        settingBox.className = 'qs-setting-box';
+        settingBox.style.setProperty('display', 'none', 'important');
+        document.body.appendChild(settingBox);
+        // 配置文本框
+        var configTextarea = document.createElement('textarea');
+        configTextarea.id = 'qs-setting-config-textarea';
+        configTextarea.className = 'qs-setting-config-textarea';
+        settingBox.appendChild(configTextarea);
+        // 底部按钮container
+        var buttonBar = document.createElement('div');
+        buttonBar.id = 'qs-setting-button-bar';
+        buttonBar.className = 'qs-setting-button-bar';
+        settingBox.appendChild(buttonBar);
+        // 重置按钮
+        var resetButton = document.createElement('button');
+        resetButton.id = 'qs-setting-button-reset';
+        resetButton.className = 'qs-setting-button';
+        resetButton.type = 'button';
+        resetButton.textContent = '重置';
+        resetButton.onclick = function (event) {
+            configTextarea.value = JSON.stringify(defaultConf, null, 4);
+        }
+        buttonBar.appendChild(resetButton);
+        // 关闭按钮
+        var closeButton = document.createElement('button');
+        closeButton.id = 'qs-setting-button-close';
+        closeButton.className = 'qs-setting-button';
+        closeButton.type = 'button';
+        closeButton.textContent = '取消';
+        closeButton.onclick = function (event) {
+            hideSettingBox();
+        }
+        buttonBar.appendChild(closeButton);
+        // 保存按钮
+        var saveButton = document.createElement('button');
+        saveButton.id = 'qs-setting-button-save';
+        saveButton.className = 'qs-setting-button';
+        saveButton.type = 'button';
+        saveButton.textContent = '保存';
+        saveButton.onclick = function (event) {
+            var newConf = JSON.parse(configTextarea.value);
+            GM_setValue('qs-saved-conf', newConf);
+            hideSettingBox();
+            // 需用户手动刷新页面重新加载配置使其生效
+            alert('设置已保存, 刷新页面后生效.');
+        }
+        buttonBar.appendChild(saveButton);
+
+        quickSearchSettingBox = settingBox;
+    }
+
+    // 设置窗口是否处于显示状态
+    function isSettingBoxVisual() {
+        quickSearchSettingBox.style.display == 'block';
+    }
+
+    // 显示设置窗口
+    function showSettingBox() {
+        if (isSettingBoxVisual()) {
+            return;
+        }
+        var confStr = JSON.stringify(conf, null, 4);
+        quickSearchSettingBox.querySelector('#qs-setting-config-textarea').value = confStr;
+        quickSearchSettingBox.style.setProperty('display', 'block', 'important');
+    }
+
+    // 隐藏设置窗口
+    function hideSettingBox() {
+        quickSearchSettingBox.style.setProperty('display', 'none', 'important');
     }
 
     ///////////////////////////////////////////////////////////////////
@@ -1270,6 +1455,7 @@
         createToolbar();
     }
     createMainBox();
+    createSettingBox();
 
     window.addEventListener('mouseup', function (event) {
         // TODO 这里逻辑有问题
