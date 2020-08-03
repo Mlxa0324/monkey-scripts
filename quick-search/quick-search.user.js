@@ -911,7 +911,7 @@
     var conf = defaultConf;
     var enableQuickSearch = true;       // 是否在当前页面启用quick search
     var lockBackground = false;         // 是否锁定后台打开搜索结果新标签页
-    
+
     var quickSearchToolbar = null;      // quick search 划词工具条
     var quickSearchMainBox = null;      // quick search 主窗口
     var quickSearchSettingBox = null;   // quick search 设置窗口
@@ -1113,6 +1113,11 @@
         toolbar.appendChild(icon);
 
         quickSearchToolbar = toolbar;
+    }
+
+    // 划词工具条是否处于显示状态
+    function isToolbarVisual() {
+        return quickSearchToolbar.style.display == 'block';
     }
 
     // 显示划词工具条
