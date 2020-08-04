@@ -1575,7 +1575,7 @@
             // 显示/隐藏工具条
             var selection = getSelection();
             if (selection && !isToolbarVisual()) {
-                showToolbar();
+                showToolbar(event);
             }
             if (!selection && isToolbarVisual()) {
                 hideToolbar();
@@ -1592,7 +1592,7 @@
                     hideMainBox();
                 }
             }
-            
+
             // esc键, 隐藏主窗口
             if (event.keyCode == 27) {
                 if (isMainBoxVisual() && !isSettingBoxVisual()) {
