@@ -767,7 +767,7 @@
             border: 1px solid #CCC !important;
         }
 
-        /* 主窗口背景层 */
+        /* 快搜主窗口背景层 */
         .qs-main-background-layer {
             all: initial !important;
             position: fixed !important;
@@ -783,7 +783,7 @@
             z-index: 20000 !important;
         }
 
-        /* 主窗口 */
+        /* 快搜主窗口 */
         .qs-mainbox {
             all: initial !important;
             position: fixed !important;
@@ -806,7 +806,7 @@
             opacity: 1 !important;
             z-index: 30000 !important;
         }
-        /* 主窗口搜索框 */
+        /* 快搜主窗口搜索框 */
         .qs-main-search-box {
             all: initial !important;
             display: block !important;
@@ -839,7 +839,7 @@
             color: #DDD !important;
             opacity: 1 !important;
         }
-        /* 主窗口常用搜索引擎列表 */
+        /* 快搜主窗口常用搜索引擎列表 */
         .qs-main-frequent-box {
             all: initial !important;
             display: block !important;
@@ -863,7 +863,7 @@
         .qs-main-frequent-icon:hover {
             border: 2px solid #CCC !important;
         }
-        /* 主窗口分类搜索引擎列表 */
+        /* 快搜主窗口分类搜索引擎列表 */
         .qs-main-classified-box {
             all: initial !important;
             display: block !important;
@@ -1012,15 +1012,15 @@
 
     var hotkeyEngineMapping = {};           // hotkey到engine的映射表
 
-    var enableQuickSearch = true;           // 是否在当前页面启用quick search
+    var enableQuickSearch = true;           // 是否在当前页面启用快搜所有功能
     var lockBackground = false;             // 是否锁定后台打开搜索结果新标签页
 
-    var quickSearchToolbar = null;          // quick search 划词工具条
-    var quickSearchBackgroundLayer = null;  // quick search 主窗口背景层
-    var quickSearchMainBox = null;          // quick search 主窗口
-    var quickSearchSettingBox = null;       // quick search 设置窗口
-    var quickSearchSearchInput = null;      // quick search 主窗口搜索框
-    var quickSearchConfigTextarea = null;   // quick search 设置窗口配置框
+    var quickSearchToolbar = null;          // 快搜划词工具条
+    var quickSearchBackgroundLayer = null;  // 快搜主窗口背景层
+    var quickSearchMainBox = null;          // 快搜主窗口
+    var quickSearchSettingBox = null;       // 快搜设置窗口
+    var quickSearchSearchInput = null;      // 快搜主窗口搜索框
+    var quickSearchConfigTextarea = null;   // 快搜设置窗口配置框
 
     ///////////////////////////////////////////////////////////////////
     // 功能函数
@@ -1302,12 +1302,12 @@
         }
     }
 
-    // 创建主窗口
+    // 创建快搜主窗口
     function createMainBox() {
-        // 主窗口背景层
+        // 快搜主窗口背景层
         //
-        // 随主窗口一同显示/隐藏, 铺满整个可视窗口. 其作用主要是:
-        // 1. 想要实现点击主窗口外面就隐藏主窗口, 但如果点击target是页面中的cross-domain iframe的话, 
+        // 随快搜主窗口一同显示/隐藏, 铺满整个可视窗口. 其作用主要是:
+        // 1. 想要实现点击快搜主窗口外面就隐藏快搜主窗口, 但如果点击target是页面中的cross-domain iframe的话, 
         //    当前window就不能捕获到该iframe的click事件, 所以覆盖一层作为以便捕获点击事件.
         // 2. 也可以做背景虚化/遮罩效果.
         var backgroundLayer = document.createElement('div');
@@ -1316,7 +1316,7 @@
         backgroundLayer.style.setProperty('display', 'none', 'important');
         document.body.appendChild(backgroundLayer);
 
-        // 主窗口container
+        // 快搜主窗口container
         var mainBox = document.createElement('div');
         mainBox.id = 'qs-mainbox';
         mainBox.className = 'qs-mainbox';
@@ -1447,14 +1447,14 @@
         quickSearchSearchInput = searchInput;
     }
 
-    // 主窗口是否处于显示状态
+    // 快搜主窗口是否处于显示状态
     function isMainBoxVisual() {
         return quickSearchMainBox.style.display == 'block';
     }
 
-    // 显示主窗口
+    // 显示快搜主窗口
     function showMainBox() {
-        // 主窗口在iframe中不显示
+        // 快搜主窗口在iframe中不显示
         if (isMainBoxVisual() || window.self != window.top) {
             return;
         }
@@ -1477,7 +1477,7 @@
         quickSearchSearchInput.select();
     }
 
-    // 隐藏主窗口
+    // 隐藏快搜主窗口
     function hideMainBox() {
         quickSearchBackgroundLayer.style.setProperty('display', 'none', 'important');
         quickSearchMainBox.style.setProperty('display', 'none', 'important');
@@ -1577,7 +1577,7 @@
     //
     window.addEventListener('keydown', function (e) {
         // s键, 超级快搜. 优先级如下:
-        // 1. 主窗口可见, 使用默认搜索引擎搜索搜索框文本.
+        // 1. 快搜主窗口可见, 使用默认搜索引擎搜索搜索框文本.
         // 2. 网页有选中文本, 使用默认搜索引擎搜索文本.
         // 3. 挑选当前搜索引擎分类中的另一个搜索引擎, 搜索当前引擎的搜索词.
         if (e.key == 's' || e.key == 'S') {
@@ -1614,7 +1614,7 @@
             return;
         }
 
-        // d键, 网址直达. 网址优先级: 搜索框已有网址(若主窗口可见) > 网页选中网址 > 当前网站主页
+        // d键, 网址直达. 网址优先级: 搜索框已有网址(若快搜主窗口可见) > 网页选中网址 > 当前网站主页
         if (e.key == 'd' || e.key == 'D') {
             e.preventDefault();
 
@@ -1636,7 +1636,7 @@
             return;
         }
 
-        // 快捷键搜索. 文本优先级: 搜索框已有文本(若主窗口可见) > 网页选中文本 > 当前页面搜索词
+        // 快捷键搜索. 文本优先级: 搜索框已有文本(若快搜主窗口可见) > 网页选中文本 > 当前页面搜索词
         if (hotkeyEngineMapping[e.key]) {
             e.preventDefault();
 
@@ -1679,7 +1679,7 @@
             if (isToolbarVisual() && !quickSearchToolbar.contains(target)) {
                 hideToolbar();
             }
-            // 隐藏主窗口
+            // 隐藏快搜主窗口
             if (isMainBoxVisual() && !isSettingBoxVisual() && !quickSearchMainBox.contains(target)) {
                 hideMainBox();
             }
@@ -1708,7 +1708,7 @@
         });
 
         window.addEventListener('keydown', function (e) {
-            // f键, 显示/隐藏主窗口
+            // f键, 显示/隐藏快搜主窗口
             if (e.key == 'f' || e.key == 'F') {
                 e.preventDefault();
                 if (!isMainBoxVisual()) {
@@ -1718,7 +1718,7 @@
                 }
             }
 
-            // esc键, 隐藏主窗口
+            // esc键, 隐藏快搜主窗口
             if (e.keyCode == 27) {
                 if (isMainBoxVisual() && !isSettingBoxVisual()) {
                     hideMainBox();
