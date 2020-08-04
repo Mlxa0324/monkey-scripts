@@ -1015,7 +1015,6 @@
     var hotkeyEngineMapping = {};           // 自定义快捷键搜索的hotkey到engine的映射表
 
     var enableQuickSearch = true;           // 是否在当前页面启用快搜所有功能
-    var lockBackground = false;             // 是否锁定后台打开搜索结果新标签页
 
     var quickSearchToolbar = null;          // 快搜划词工具条
     var quickSearchBackgroundLayer = null;  // 快搜主窗口背景层
