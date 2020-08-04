@@ -1026,15 +1026,6 @@
     // 功能函数
     ///////////////////////////////////////////////////////////////////
 
-    // 获取元素style属性, 包括css中的
-    function getStyleByElement(e, styleProp) {
-        if (window.getComputedStyle) {
-            return document.defaultView.getComputedStyle(e, null).getPropertyValue(styleProp);
-        } else if (e.currentStyle) {
-            return e.currentStyle[styleProp];
-        }
-    }
-
     // 获取可视窗口在文档(页面)中的绝对位置
     function getWindowPosition() {
         return {
