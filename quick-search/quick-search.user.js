@@ -1010,7 +1010,7 @@
     
     var conf = GM_getValue('qs-saved-conf', defaultConf);
 
-    var hotkeyEngineMapping = {};           // hotkey到engine的映射表
+    var hotkeyEngineMapping = {};           // 自定义快捷键搜索的hotkey到engine的映射表
 
     var enableQuickSearch = true;           // 是否在当前页面启用快搜所有功能
     var lockBackground = false;             // 是否锁定后台打开搜索结果新标签页
@@ -1636,7 +1636,7 @@
             return;
         }
 
-        // 快捷键搜索. 文本优先级: 搜索框已有文本(若快搜主窗口可见) > 网页选中文本 > 当前页面搜索词
+        // 自定义快捷键搜索. 文本优先级: 搜索框已有文本(若快搜主窗口可见) > 网页选中文本 > 当前页面搜索词
         if (hotkeyEngineMapping[e.key]) {
             e.preventDefault();
 
