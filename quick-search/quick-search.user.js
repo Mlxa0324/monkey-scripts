@@ -23,17 +23,37 @@
     ///////////////////////////////////////////////////////////////////
 
     const defaultConf = {
-        autoCopyToClipboard: true,  // 划词时自动复制到剪贴板(内容为文本格式)
-        enableOnInput: true,        // 是否在input/textarea上启用quick search, 默认当在input/textarea中选中文本时启用
-        showToolbar: true,          // 显示划词工具条
-        showPlaceholder: true,      // 显示使用方式提示信息
-        showFrequentEngines: true,  // 显示常用搜索引擎
-        showClassifiedEngines: true,// 显示分类搜索引擎
-        defaultEngine: {            // 搜索框默认搜索引擎
+        //
+        // 一些开关
+        //
+        showToolbar: true,              // 显示划词工具条
+        showFrequentEngines: true,      // 显示常用搜索引擎
+        showClassifiedEngines: true,    // 显示分类搜索引擎
+        showPlaceholder: true,          // 显示使用方式提示信息(如搜索框placeholder)
+        enableOnInput: true,            // 是否在input/textarea上启用划词和快捷键
+        autoCopyToClipboard: true,      // 划词时自动复制到剪贴板(内容为文本格式)
+        //
+        // 搜索框默认搜索引擎
+        // 属性:
+        //   - name 搜索引擎名称
+        //   - url 搜索引擎搜索url
+        //   - home 搜索引擎主页url
+        //
+        defaultEngine: {
             name: '百度',
             url: 'https://www.baidu.com/s?wd=%s&ie=utf-8',
+            home: 'https://www.baidu.com/',
         },
-        hotkeyEngines: [            // 绑定快捷键的搜索引擎列表(s/d/f键被脚本征用, 请勿使用)
+        //
+        // 绑定快捷键的搜索引擎列表
+        // 属性:
+        //   - name 搜索引擎名称
+        //   - url 搜索引擎搜索url
+        //   - home 搜索引擎主页url
+        //   - hotkeys 快捷键列表, 此处目前仅支持单字符配置, 实际起作用的是配置的单字符键 及 Alt+单字符键, s/d/f/l键已被脚本征用
+        //   - enable 是否启用
+        //
+        hotkeyEngines: [
             {
                 name: '百度百科',
                 url: 'https://baike.baidu.com/search/word?pic=1&sug=1&word=%s',
@@ -59,7 +79,16 @@
                 enable: true,
             },
         ],
-        frequentEngines: [          // 常用搜索引擎列表
+        //
+        // 常用搜索引擎列表
+        // 属性:
+        //   - name 搜索引擎名称
+        //   - url 搜索引擎搜索url
+        //   - home 搜索引擎主页url
+        //   - icon 搜索引擎图标, base64编码
+        //   - enable 是否启用
+        //
+        frequentEngines: [
             {
                 name: '百度',
                 url: 'https://www.baidu.com/s?wd=%s&ie=utf-8',
@@ -118,7 +147,20 @@
                 enable: true
             },
         ],
-        classifiedEngines: [        // 分类搜索引擎列表
+        //
+        // 分类搜索引擎列表, 二维数组, 默认认为该配置包含了所有已配置搜索引擎
+        // 一级分类属性:
+        //   - name 分类名称
+        //   - enable 该分类是否启用
+        //   - engines 该分类下的搜索引擎列表
+        // 二级搜索引擎属性:
+        //   - name 搜索引擎名称
+        //   - url 搜索引擎搜索url
+        //   - home 搜索引擎主页url
+        //   - icon 搜索引擎图标, base64编码
+        //   - enable 搜索引擎是否启用
+        //
+        classifiedEngines: [
             {
                 name: '网页',
                 enable: true,
