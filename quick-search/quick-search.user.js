@@ -1009,6 +1009,9 @@
     ///////////////////////////////////////////////////////////////////
     
     var conf = GM_getValue('qs-saved-conf', defaultConf);
+
+    var hotkeyEngineMapping = {};           // hotkey到engine的映射表
+
     var enableQuickSearch = true;           // 是否在当前页面启用quick search
     var lockBackground = false;             // 是否锁定后台打开搜索结果新标签页
 
@@ -1176,6 +1179,16 @@
         css.id = 'quick-search-css';
         css.textContent = sheet;
         document.getElementsByTagName('head')[0].appendChild(css);
+    }
+
+    // 初始化热键映射表
+    function initHotkeyEngineMapping() {
+        conf.hotkeyEngines.forEach(engine => {
+            if (!engine.enable) return; // 此处return搭配forEach, 请勿改为其他形式循环
+            engine.hotkeys.forEach(key => {
+                hotkeyEngineMapping[key] = engine;
+            });
+        });
     }
 
     // 创建划词工具条
@@ -1437,7 +1450,7 @@
             return;
         }
         
-        // 设置搜索框内容, 优先级 选中文本 > 搜索框已有文本 > 当前页面搜索词
+        // 设置搜索框内容, 文本优先级: 网页选中文本 > 搜索框已有文本 > 当前页面搜索词
         var selection = getSelection();
         if (selection) {
             quickSearchSearchInput.value = selection;
@@ -1543,6 +1556,7 @@
     ///////////////////////////////////////////////////////////////////
 
     loadSheet();
+    initHotkeyEngineMapping();
     if (conf.showToolbar) {
         createToolbar();
     }
@@ -1552,7 +1566,35 @@
     //
     // top window和iframe共用的事件处理逻辑
     //
+    window.addEventListener('keydown', function (e) {
+        // 快捷键搜索. 文本优先级: 搜索框已有文本(若主窗口可见) > 网页选中文本 > 当前页面搜索词
+        if (hotkeyEngineMapping[e.key]) {
+            var engine = hotkeyEngineMapping[e.key];
 
+            var query = null;
+            if (isMainBoxVisual()) {
+                query = quickSearchSearchInput.value.trim();
+            } else {
+                query = getSelection();
+                if (!query) {
+                    query = getUrlQuery();
+                }
+            }
+            
+            var url = null;
+            if (query) {
+                url = engine.url.replace('%s', encodeURIComponent(query));
+            } else {
+                url = engine.home;
+                if (!url) {
+                    var u = new URL(engine.url);
+                    url = `${u.protocol}//${u.hostname}/`;
+                }
+            }
+
+            GM_openInTab(url);
+        }
+    });
 
     //
     // 只在top window中使用的事件处理逻辑
