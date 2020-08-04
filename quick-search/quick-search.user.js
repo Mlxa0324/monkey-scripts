@@ -1582,6 +1582,16 @@
             }
         }, false);
 
+        // 有时候selectionchange发生在mouseup之后, 导致没有selection时toolbar依然显示.
+        // 故再添加selectionchange事件以隐藏toolbar.
+        // 由于在鼠标划词拖动过程中会不停触发selectionchange事件, 所以最好不要以此事件来显示/调整toolbar位置.
+        document.addEventListener('selectionchange', function (e) {
+            var selection = getSelection();
+            if (!selection && isToolbarVisual()) {
+                hideToolbar();
+            }
+        });
+
         window.addEventListener('keydown', function (event) {
             // f键, 显示/隐藏主窗口
             if (event.key == 'f') {
