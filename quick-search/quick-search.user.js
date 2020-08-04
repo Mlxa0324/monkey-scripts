@@ -35,25 +35,25 @@
             {
                 name: '百度百科',
                 url: 'https://baike.baidu.com/search/word?pic=1&sug=1&word=%s',
-                hotkey: 'w',
+                hotkeys: ['w', 'W'],
                 enable: true,
             },
             {
                 name: '百度翻译',
                 url: 'https://fanyi.baidu.com/#auto/zh/%s',
-                hotkey: 'e',
+                hotkeys: ['e', 'E'],
                 enable: true,
             },
             {
                 name: '百度',
                 url: 'https://www.baidu.com/s?wd=%s&ie=utf-8',
-                hotkey: 'b',
+                hotkeys: ['b', 'B'],
                 enable: true,
             },
             {
                 name: 'Google',
                 url: 'https://www.google.com/search?q=%s&ie=utf-8&oe=utf-8',
-                hotkey: 'g',
+                hotkeys: ['g', 'G'],
                 enable: true,
             },
         ],
@@ -767,6 +767,22 @@
             border: 1px solid #CCC !important;
         }
 
+        /* 主窗口背景层 */
+        .qs-main-background-layer {
+            all: initial !important;
+            position: fixed !important;
+            display: block !important;
+            top: 0px !important;
+            left: 0px !important;
+            width: 100% !important;
+            height: 100% !important;
+            border: 0px !important;
+            background-color: rgba(255,255,255,0.3) !important;
+            /* 使背景层背后的所有元素虚化 */
+            backdrop-filter: blur(5px) !important;
+            z-index: 20000 !important;
+        }
+
         /* 主窗口 */
         .qs-mainbox {
             all: initial !important;
@@ -788,7 +804,7 @@
             border-radius: 10px !important;
             background-color: #FFF !important;
             opacity: 1 !important;
-            z-index: 20000 !important;
+            z-index: 30000 !important;
         }
         /* 主窗口搜索框 */
         .qs-main-search-box {
@@ -807,7 +823,7 @@
             max-width: 600px !important;
             height: 40px !important;
             padding: 0px 13px !important;
-            font: 16px/18px arial !important;
+            font: 17px/20px arial !important;
             border: 2px solid #C4C7CE !important;
             border-radius: 10px !important;
             outline: none !important;
@@ -820,7 +836,7 @@
             background-color: #425d78 !important;
         }
         .qs-main-search-input::placeholder {
-            color: #EEE !important;
+            color: #DDD !important;
             opacity: 1 !important;
         }
         /* 主窗口常用搜索引擎列表 */
@@ -949,7 +965,7 @@
             border-radius: 10px !important;
             background-color: #FFF !important;
             opacity: 1 !important;
-            z-index: 30000 !important;
+            z-index: 40000 !important;
         }
         .qs-setting-config-textarea {
             all: initial !important;
@@ -997,6 +1013,7 @@
     var lockBackground = false;             // 是否锁定后台打开搜索结果新标签页
 
     var quickSearchToolbar = null;          // quick search 划词工具条
+    var quickSearchBackgroundLayer = null;  // quick search 主窗口背景层
     var quickSearchMainBox = null;          // quick search 主窗口
     var quickSearchSettingBox = null;       // quick search 设置窗口
     var quickSearchSearchInput = null;      // quick search 主窗口搜索框
@@ -1037,19 +1054,21 @@
         var hostname = window.location.hostname;
         hostname = hostname.replace(/^(www\.)/, '');
 
-        conf.classifiedEngines.forEach((classEngines) => {
-            classEngines.engines.forEach((engine, index) => {
+        // 因为想要在循环中返回最终结果, 因此不能使用forEach语法
+        for (var classEngines of conf.classifiedEngines) {
+            for (var i=0; i<classEngines.engines.length; i++) {
+                var engine = classEngines.engines[i];
                 var engineHostname = new URL(engine.url).hostname;
                 engineHostname = engineHostname.replace(/^(www\.)/, '');
                 if (hostname == engineHostname) {
                     return {
                         engine: engine,
-                        index: index,
+                        index: i,
                         classEngines: classEngines
                     };
                 }
-            });
-        });
+            }
+        }
 
         return null;
     }
@@ -1081,23 +1100,32 @@
     // TODO 可优化. 将url按照 ? # / 拆分为part, 然后判断哪个input/textarea的值与part完全相等, 当然纯数字依然除外.
     function getUrlQuery() {
 
+        var urlTail = removeDomain(window.location.href);
         var engineInfo = getMatchedEngineInfo();
+        var engine = engineInfo ? engineInfo.engine : null;
 
         // 尝试利用配置的搜索引擎信息从url中获取搜索词
-        if (engineInfo) {
-            var engine = engineInfo.engine;
+        if (engine && engine.url.includes('%s')) {
             if (engine.url.includes('?')) {    // engine.url中含有问号(?)
                 var queryKey = getQueryKey(engine);
                 var params = new URLSearchParams(window.location.search);
                 var query = params.get(queryKey);
                 if (query) {
+                    console.log(`Quick Search: get query by URL-KV, engine is ${engine.url}`);
                     return query;
                 }
             } else {    // engine.url中没有问号(?)
                 var parts = removeDomain(engine.url).split('%s');
-                var urlTail = removeDomain(window.location.href);
-                if (urlTail.startsWith(parts[0]) && urlTail.endsWith(parts[1])) {
-                    return urlTail.substring(parts[0].length, urlTail.length - parts[1].length);
+                if (parts.length == 2 && urlTail.startsWith(parts[0]) && urlTail.endsWith(parts[1])) {
+                    var query = urlTail.substring(parts[0].length, urlTail.length - parts[1].length);
+                    var index = query.search(/[\/\?\&\#]/);   // 是否含有 / ? & #
+                    if (index != -1) {
+                        query = query.substring(0, index);
+                    }
+                    if (query) {
+                        console.log(`Quick Search: get query by URL-PART, engine is ${engine.url}`);
+                        return query;
+                    }
                 }
             }
         }
@@ -1108,13 +1136,14 @@
             var eleValue = ele.value.trim();
             if (eleValue && !/^\d+$/.test(eleValue)) {
                 var encodedEleValue = encodeURIComponent(eleValue);
-                var urlTail = removeDomain(window.location.href);
                 if (urlTail.includes(encodedEleValue)) {
+                    console.log(`Quick Search: get query by ${ele.tagName}[id='${ele.id}'], engine is ${engine ? engine.url : 'NULL'}`);
                     return encodedEleValue;
                 }
             }
         }
 
+        console.log(`Quick Search: query is NULL, engine is ${engine ? engine.url : 'NULL'}`);
         return null;
     }
 
@@ -1160,7 +1189,7 @@
 
         // 常用搜索引擎按钮
         conf.frequentEngines.forEach((engine, index) => {
-            if (!engine.enable) return;
+            if (!engine.enable) return; // 此处return搭配forEach, 请勿改为其他形式循环
             var icon = document.createElement('img');
             icon.id = 'qs-toolbar-icon-' + index;
             icon.className = 'qs-toolbar-icon';
@@ -1208,13 +1237,13 @@
 
     // 划词工具条是否处于显示状态
     function isToolbarVisual() {
-        return quickSearchToolbar.style.display == 'block';
+        return quickSearchToolbar && quickSearchToolbar.style.display == 'block';
     }
 
     // 显示划词工具条
     function showToolbar(event) {
 
-        if (isToolbarVisual()) {
+        if (!quickSearchToolbar || isToolbarVisual()) {
             return;
         }
 
@@ -1246,11 +1275,25 @@
 
     // 隐藏划词工具条
     function hideToolbar() {
-        quickSearchToolbar.style.setProperty('display', 'none', 'important');
+        if (quickSearchToolbar) {
+            quickSearchToolbar.style.setProperty('display', 'none', 'important');
+        }
     }
 
     // 创建主窗口
     function createMainBox() {
+        // 主窗口背景层
+        //
+        // 随主窗口一同显示/隐藏, 铺满整个可视窗口. 其作用主要是:
+        // 1. 想要实现点击主窗口外面就隐藏主窗口, 但如果点击target是页面中的cross-domain iframe的话, 
+        //    当前window就不能捕获到该iframe的click事件, 所以覆盖一层作为以便捕获点击事件.
+        // 2. 也可以做背景虚化/遮罩效果.
+        var backgroundLayer = document.createElement('div');
+        backgroundLayer.id = 'qs-main-background-layer';
+        backgroundLayer.className = 'qs-main-background-layer';
+        backgroundLayer.style.setProperty('display', 'none', 'important');
+        document.body.appendChild(backgroundLayer);
+
         // 主窗口container
         var mainBox = document.createElement('div');
         mainBox.id = 'qs-mainbox';
@@ -1266,6 +1309,13 @@
         var searchInput = document.createElement('input');
         searchInput.id = 'qs-main-search-input';
         searchInput.className = 'qs-main-search-input';
+        searchInput.addEventListener('keydown', function (event) {
+            if (event.keyCode == 13) {  // 回车键
+                var query = searchInput.value.trim();
+                var url = conf.defaultEngine.url.replace('%s', encodeURIComponent(query));
+                GM_openInTab(url);
+            }
+        }, false);
         if (conf.showPlaceholder) {
             searchInput.placeholder = `回车以使用${conf.defaultEngine.name}搜索`;
         }
@@ -1278,7 +1328,7 @@
             frequentBox.className = 'qs-main-frequent-box';
             mainBox.appendChild(frequentBox);
             conf.frequentEngines.forEach((engine, index) => {
-                if (!engine.enable) return;
+                if (!engine.enable) return; // 此处return搭配forEach, 请勿改为其他形式循环
                 var icon = document.createElement('img');
                 icon.id = 'qs-main-frequent-icon-' + index;
                 icon.className = 'qs-main-frequent-icon';
@@ -1299,7 +1349,7 @@
             classifiedBox.className = 'qs-main-classified-box';
             mainBox.appendChild(classifiedBox);
             conf.classifiedEngines.forEach((family, fIndex) => {
-                if (!family.enable) return;
+                if (!family.enable) return; // 此处return搭配forEach, 请勿改为其他形式循环
                 // 一个分类一列
                 var familyBox = document.createElement('div');
                 familyBox.id = 'qs-main-classified-family-box-' + fIndex;
@@ -1312,11 +1362,16 @@
                 familyTitle.textContent = family.name;
                 familyBox.appendChild(familyTitle);
                 family.engines.forEach((engine, eIndex) => {
-                    if (!engine.enable) return;
+                    if (!engine.enable) return; // 此处return搭配forEach, 请勿改为其他形式循环
                     // 搜索引擎
                     var engineBox = document.createElement('div');
                     engineBox.id = 'qs-main-classified-family-engine-' + fIndex + '-' + eIndex;
                     engineBox.className = 'qs-main-classified-family-engine';
+                    engineBox.addEventListener('click', function (event) {
+                        var query = searchInput.value.trim();
+                        var url = engine.url.replace('%s', encodeURIComponent(query));
+                        GM_openInTab(url);
+                    }, false);
                     familyBox.appendChild(engineBox);
                     // 搜索引擎icon
                     var engineIcon = document.createElement('img');
@@ -1365,6 +1420,7 @@
         };
         helpInfoBox.appendChild(settingLink);
 
+        quickSearchBackgroundLayer = backgroundLayer;
         quickSearchMainBox = mainBox;
         quickSearchSearchInput = searchInput;
     }
@@ -1376,7 +1432,8 @@
 
     // 显示主窗口
     function showMainBox() {
-        if (isMainBoxVisual()) {
+        // 主窗口在iframe中不显示
+        if (isMainBoxVisual() || window.self != window.top) {
             return;
         }
         
@@ -1385,9 +1442,13 @@
         if (selection) {
             quickSearchSearchInput.value = selection;
         } else if (!quickSearchSearchInput.value.trim()) {
-            quickSearchSearchInput.value = getUrlQuery();
+            var query = getUrlQuery();
+            if (query) {
+                quickSearchSearchInput.value = decodeURIComponent(query);
+            }
         }
 
+        quickSearchBackgroundLayer.style.setProperty('display', 'block', 'important');
         quickSearchMainBox.style.setProperty('display', 'block', 'important');
 
         // 选中搜索框文本
@@ -1396,6 +1457,7 @@
 
     // 隐藏主窗口
     function hideMainBox() {
+        quickSearchBackgroundLayer.style.setProperty('display', 'none', 'important');
         quickSearchMainBox.style.setProperty('display', 'none', 'important');
     }
 
@@ -1458,7 +1520,7 @@
 
     // 设置窗口是否处于显示状态
     function isSettingBoxVisual() {
-        quickSearchSettingBox.style.display == 'block';
+        return quickSearchSettingBox.style.display == 'block';
     }
 
     // 显示设置窗口
@@ -1487,23 +1549,63 @@
     createMainBox();
     createSettingBox();
 
-    window.addEventListener('mouseup', function (event) {
-        // TODO 这里逻辑有问题
-        if (getSelection()) {
-            showToolbar(event);
-        } else {
-            hideToolbar();
-        }
-    }, false);
+    //
+    // top window和iframe中都响应的事件
+    //
 
-    window.addEventListener('keydown', function (event) {
-        if (event.key == 'f') {
-            event.preventDefault();
-            if (!isMainBoxVisual()) {
-                showMainBox();
-            } else {
+
+    //
+    // 只在top window中响应的事件
+    //
+    if (window.self == window.top) {
+        window.addEventListener('mousedown', function (event) {
+            var target = event.target;
+            // 隐藏工具条
+            if (isToolbarVisual() && !quickSearchToolbar.contains(target)) {
+                hideToolbar();
+            }
+            // 隐藏主窗口
+            if (isMainBoxVisual() && !isSettingBoxVisual() && !quickSearchMainBox.contains(target)) {
                 hideMainBox();
             }
-        }
-    }, false);
+        }, false);
+
+        window.addEventListener('mouseup', function (event) {
+            var target = event.target;
+            // 显示/隐藏工具条
+            var selection = getSelection();
+            if (selection && !isToolbarVisual()) {
+                showToolbar();
+            }
+            if (!selection && isToolbarVisual()) {
+                hideToolbar();
+            }
+        }, false);
+
+        window.addEventListener('keydown', function (event) {
+            // f键, 显示/隐藏主窗口
+            if (event.key == 'f') {
+                event.preventDefault();
+                if (!isMainBoxVisual()) {
+                    showMainBox();
+                } else {
+                    hideMainBox();
+                }
+            }
+            
+            // esc键, 隐藏主窗口
+            if (event.keyCode == 27) {
+                if (isMainBoxVisual() && !isSettingBoxVisual()) {
+                    hideMainBox();
+                }
+            }
+        }, false);
+    }
+
+    //
+    // 只在iframe中响应的事件
+    //
+    if (window.self != window.top) {
+
+    }
 })();
