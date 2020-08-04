@@ -1550,12 +1550,12 @@
     createSettingBox();
 
     //
-    // top window和iframe中都响应的事件
+    // top window和iframe共用的事件处理逻辑
     //
 
 
     //
-    // 只在top window中响应的事件
+    // 只在top window中使用的事件处理逻辑
     //
     if (window.self == window.top) {
         window.addEventListener('mousedown', function (e) {
@@ -1613,7 +1613,7 @@
     }
 
     //
-    // 只在iframe中响应的事件
+    // 只在iframe中使用的事件处理逻辑
     //
     if (window.self != window.top) {
 
