@@ -45,6 +45,7 @@ f 打开/关闭Quick Search主弹窗, 当搜索框中没有文本或者同时按
 
 > 下面的checklist等开发好之后可以加到上面的用户文档中
 
+- 全局快捷键Alt+相应按键, 在input/textarea中也生效
 - 同时响应大写按键
 - 同时按下cmd/ctrl/shift, f等按键不要响应
 - 配置中的搜索引擎每个都有enable属性

@@ -1576,6 +1576,44 @@
     // top window和iframe共用的事件处理逻辑
     //
     window.addEventListener('keydown', function (e) {
+        // s键, 超级快搜. 优先级如下:
+        // 1. 主窗口可见, 使用默认搜索引擎搜索搜索框文本.
+        // 2. 网页有选中文本, 使用默认搜索引擎搜索文本.
+        // 3. 挑选当前搜索引擎分类中的另一个搜索引擎, 搜索当前引擎的搜索词.
+        if (e.key == 's' || e.key == 'S') {
+            e.preventDefault();
+
+            var engine = null;
+            var query = null;
+            if (isMainBoxVisual()) {
+                engine = conf.defaultEngine;
+                query = quickSearchSearchInput.value.trim();
+            } else {
+                var selection = getSelection();
+                if (selection) {
+                    engine = conf.defaultEngine;
+                    query = selection;
+                } else {
+                    var nowEngineInfo = getMatchedEngineInfo();
+                    if (nowEngineInfo) {
+                        var nowClassEngines = nowEngineInfo.classEngines.engines;
+                        nowClassEngines.forEach((eng, i) => {
+                            if (!engine && eng.enable && i != nowEngineInfo.index) {
+                                engine = eng;
+                            }
+                        });
+                    }
+                    query = getUrlQuery();
+                }
+            }
+            if (engine && query) {
+                var url = engine.url.replace('%s', encodeURIComponent(query));
+                openUrl(url, e);
+            }
+
+            return;
+        }
+
         // d键, 网址直达. 网址优先级: 搜索框已有网址(若主窗口可见) > 网页选中网址 > 当前网站主页
         if (e.key == 'd' || e.key == 'D') {
             e.preventDefault();
