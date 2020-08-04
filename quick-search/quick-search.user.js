@@ -1134,7 +1134,7 @@
     // 如果没有解析到或者当前页面不在配置的搜索引擎列表中, 尝试获取文本(纯数字除外)在url中完整出现的input/textarea的值.
     // 如果还是没有, 则认为当前页面url中没有搜索词.
     //
-    // TODO 可优化. 将url按照 ? # / 拆分为part, 然后判断哪个input/textarea的值与part完全相等, 当然纯数字依然除外.
+    // TODO 可优化. 将url按照 / ? & # 拆分为part, 然后判断哪个input/textarea的值与part完全相等, 当然纯数字依然除外.
     function getUrlQuery() {
 
         var urlTail = removeDomain(window.location.href);
