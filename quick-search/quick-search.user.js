@@ -1195,7 +1195,8 @@
     // 如果没有解析到或者当前页面不在配置的搜索引擎列表中, 尝试获取文本(纯数字除外)在url中完整出现的input/textarea的值.
     // 如果还是没有, 则认为当前页面url中没有搜索词.
     //
-    // TODO 可优化. 将url按照 / ? & # 拆分为part, 然后判断哪个input/textarea的值与part完全相等, 当然纯数字依然除外.
+    // TODO 可优化项: 将url按照 / ? & # 拆分为part, 然后判断哪个input/textarea的值与part完全相等, 当然纯数字依然除外.
+    // TODO 可优化项: 只判断哪些可以被看到或者能获取到坐标位置的input/textarea元素.
     function getUrlQuery() {
 
         var urlTail = removeUrlDomain(window.location.href);
@@ -1386,7 +1387,7 @@
     }
 
     // 快捷键搜索.
-    // 只能搜索, 不能明确打开引擎主页.
+    // 同样, 当query为空时打开引擎主页, 否则正常搜索.
     function openEngineOnKey(engine, query, event) {
         openEngine(engine, query, event);
     }
@@ -1801,6 +1802,7 @@
         if (isSettingBoxVisual()) {
             return;
         }
+
         var confStr = JSON.stringify(conf, null, 4);
         quickSearchConfigTextarea.value = confStr;
         quickSearchSettingBox.style.setProperty('display', 'block', 'important');
@@ -1990,6 +1992,7 @@
                 } else {
                     hideMainBox();
                 }
+                return;
             }
 
             // esc键, 隐藏快搜主窗口
@@ -1997,6 +2000,7 @@
                 if (isMainBoxVisual() && !isSettingBoxVisual()) {
                     hideMainBox();
                 }
+                return;
             }
 
             // (Alt+)l键, 锁定/解锁快搜所有功能.
