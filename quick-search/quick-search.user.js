@@ -1086,6 +1086,25 @@
         .qs-setting-button:hover {
             color: #4E71F2 !important;
         }
+
+        /* 信息提示浮层 */
+        .qs-info-tips-layer {
+            all: initial !important;
+            position: fixed !important;
+            display: block !important;
+            overflow: hidden !important;
+            bottom: 30px !important;
+            right: 30px !important;
+            width: fit-content !important;
+            height: fit-content !important;
+            padding: 10px !important;
+            font-size: 13px !important;
+            color: #FFF !important;
+            border: 0px !important;
+            border-radius: 3px !important;
+            background-color: rgba(0,0,0,0.7) !important;
+            z-index: 50000 !important;
+        }
     `;
 
     ///////////////////////////////////////////////////////////////////
@@ -1102,6 +1121,7 @@
     var quickSearchBackgroundLayer = null;  // 快搜主窗口背景层
     var quickSearchMainBox = null;          // 快搜主窗口
     var quickSearchSettingBox = null;       // 快搜设置窗口
+    var quickSearchInfoTipsLayer = null;    // 快搜信息提示浮层
     var quickSearchSearchInput = null;      // 快搜主窗口搜索框
     var quickSearchConfigTextarea = null;   // 快搜设置窗口配置框
 
@@ -1771,6 +1791,30 @@
         quickSearchSettingBox.style.setProperty('display', 'none', 'important');
     }
 
+    // 创建信息提示浮层
+    function createInfoTipsLayer() {
+        var infoTipsLayer = document.createElement('div');
+        infoTipsLayer.id = 'qs-info-tips-layer';
+        infoTipsLayer.className = 'qs-info-tips-layer';
+        infoTipsLayer.style.setProperty('display', 'none', 'important');
+        document.body.appendChild(infoTipsLayer);
+
+        quickSearchInfoTipsLayer = infoTipsLayer;
+    }
+
+    // 显示信息提示浮层
+    var idOfSettimeout = null;
+    function showInfoTipsLayer(info) {
+        quickSearchInfoTipsLayer.textContent = 'Quick Search: ' + info;
+        quickSearchInfoTipsLayer.style.setProperty('display', 'block', 'important');
+        if (idOfSettimeout) {
+            clearTimeout(idOfSettimeout);
+        }
+        idOfSettimeout = setTimeout(function () {
+            quickSearchInfoTipsLayer.style.setProperty('display', 'none', 'important');
+        }, 2000);
+    }
+
     function initQuickSearch() {
         loadSheet();
         initHotkeyEngineMapping();
@@ -1779,6 +1823,7 @@
         }
         createMainBox();
         createSettingBox();
+        createInfoTipsLayer();
     }
 
     // 百度等网页会在不刷新页面的情况下改变网页内容, 导致quick search除了js脚本之外的东东全部没了.
@@ -1826,6 +1871,9 @@
             if (quickSearchPageLock) {
                 hideToolbar();
                 hideMainBox();
+                showInfoTipsLayer('已禁用(🔒)');
+            } else {
+                showInfoTipsLayer('已启用(🚀)');
             }
             return;
         }
