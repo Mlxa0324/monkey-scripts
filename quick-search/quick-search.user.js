@@ -877,7 +877,8 @@
             left: 50% !important;
             top: 50% !important;
             transform: translate(-50%, -50%) !important;
-            width: fit-content !important;
+            /* 宽度优先展示 */
+            width: max-content !important;
             min-width: 500px !important;
             max-width: 1400px !important;
             min-height: 75px !important;
