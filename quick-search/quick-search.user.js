@@ -2015,7 +2015,9 @@
 
             if (e.data.keydown) {
                 if (e.data.keydown == 'KeyF') {
-                    showMainBox(e.data.query);
+                    if (!quickSearchPageLock) {
+                        showMainBox(e.data.query);
+                    }
                 }
                 if (e.data.keydown == 'KeyL') {
                     toggleQuickSearchPageLock();
