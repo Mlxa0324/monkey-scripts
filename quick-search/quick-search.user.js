@@ -1052,7 +1052,7 @@
     // 全局变量
     ///////////////////////////////////////////////////////////////////
     
-    var conf = GM_getValue('qs-saved-conf', defaultConf);
+    var conf = GM_getValue('qs-conf', defaultConf);
 
     var hotkeyEngineMapping = {};           // 自定义快捷键搜索的hotkey到engine的映射表
 
@@ -1110,8 +1110,8 @@
         return null;
     }
 
-    // 获取搜索引擎的query的key
-    function getQueryKey(engine) {
+    // 获取搜索引擎url中query的key
+    function getUrlQueryKey(engine) {
         var params = new URL(engine.url).searchParams;
         for (var param of params) {
             if (param[1].includes('%s')) {
@@ -1122,7 +1122,7 @@
     }
 
     // 移除url中的domain(protocol+host)
-    function removeDomain(url) {
+    function removeUrlDomain(url) {
         var u = new URL(url);
         var domain = `${u.protocol}//${u.host}`;
         return url.substring(domain.length);
@@ -1137,14 +1137,14 @@
     // TODO 可优化. 将url按照 / ? & # 拆分为part, 然后判断哪个input/textarea的值与part完全相等, 当然纯数字依然除外.
     function getUrlQuery() {
 
-        var urlTail = removeDomain(window.location.href);
+        var urlTail = removeUrlDomain(window.location.href);
         var engineInfo = getMatchedEngineInfo();
         var engine = engineInfo ? engineInfo.engine : null;
 
         // 尝试利用配置的搜索引擎信息从url中获取搜索词
         if (engine && engine.url.includes('%s')) {
             if (engine.url.includes('?')) {    // engine.url中含有问号(?)
-                var queryKey = getQueryKey(engine);
+                var queryKey = getUrlQueryKey(engine);
                 var params = new URLSearchParams(window.location.search);
                 var query = params.get(queryKey);
                 if (query) {
@@ -1152,7 +1152,7 @@
                     return query;
                 }
             } else {    // engine.url中没有问号(?)
-                var parts = removeDomain(engine.url).split('%s');
+                var parts = removeUrlDomain(engine.url).split('%s');
                 if (parts.length == 2 && urlTail.startsWith(parts[0]) && urlTail.endsWith(parts[1])) {
                     var query = urlTail.substring(parts[0].length, urlTail.length - parts[1].length);
                     var index = query.search(/[\/\?\&\#]/);   // 是否含有 / ? & #
@@ -1201,8 +1201,15 @@
     }
 
     // 判断是否允许响应当前按键
+    // 默认只响应: 输入框外的单字符按键 / Alt+单字符 / Cmd/Ctrl+Alt+单字符
     function isAllowHotkey(event) {
         var target = event.target;
+        if ((event.metaKey || event.ctrlKey) && !event.altKey) {
+            return false;
+        }
+        if (event.shiftKey) {
+            return false;
+        }
         if (quickSearchPageLock && event.code != 'KeyL') {
             return false;
         }
@@ -1222,30 +1229,138 @@
         return true;
     }
 
-    // 补全url
-    function getCompletedUrl(url) {
-        var dotCount = (url.match(/\./g) || []).length;
-        if (dotCount == 0) {
-            url = 'www.' + url + '.com';
-        } else if (dotCount == 1) {
-            url = 'www.' + url;
+    // 获取搜索引擎主页url
+    function getEngineHome(engine) {
+        if (engine.home) {
+            return engine.home;
+        } else {
+            var url = new URL(engine.url);
+            return `${url.protocol}//${url.hostname}/`;
         }
-        if (!url.includes('://')) {
-            url = 'http://' + url;
-        }
-        return url;
     }
 
-    // 打开url
-    function openUrl(url, event) {
-        GM_openInTab(url);
+    // 获取直达的网址. 网址优先级: 搜索框已有网址(若快搜主窗口可见) > 网页中选中网址
+    // 返回 网址 及 网址来源
+    function getUrl() {
+        var url, source;
+
+        if (isMainBoxVisual()) {
+            url = quickSearchSearchInput.value.trim();
+            source = 'mainbox';
+        } else {
+            url = getSelection();
+            source = 'selection';
+        }
+
+        // 补全网址
+        if (url) {
+            var dotCount = (url.match(/\./g) || []).length;
+            if (dotCount == 0) {
+                url = 'www.' + url + '.com';
+            } else if (dotCount == 1) {
+                url = 'www.' + url;
+            }
+            if (!url.includes('://')) {
+                url = 'http://' + url;
+            }
+        }
+
+        if (!url) {
+            source = null;
+        }
+        return {
+            url: url,
+            source: source
+        };
     }
+
+    // 获取搜索词. 文本优先级: 搜索框已有文本(若快搜主窗口可见) > 网页中选中文本 > 当前页面搜索词
+    // 返回 搜索词 及 搜索词来源
+    function getQuery() {
+        var query, source;
+
+        if (isMainBoxVisual()) {
+            query = quickSearchSearchInput.value.trim();
+            source = 'mainbox';
+        } else {
+            query = getSelection();
+            source = 'selection';
+            if (!query) {
+                query = getUrlQuery();
+                source = 'url';
+            }
+        }
+
+        if (!query) {
+            source = null;
+        }
+        return {
+            query: query,
+            source: source
+        };
+    }
+
+    // 打开url.
+    // 当按下Cmd(Mac系统)/Ctrl(Windows/Linux系统), 则后台打开url.
+    function openUrl(url, event) {
+        // console.log(`Quick Search: open url, url is ${url}`);
+        if (!url) return;
+        if (event.metaKey || event.ctrlKey) {
+            GM_openInTab(url, true);
+        } else {
+            GM_openInTab(url, false);
+        }
+    }
+
+    // 打开engine搜索结果或engine主页.
+    function openEngine(engine, query, event) {
+        // console.log(`Quick Search: open engine, engine is ${engine.url}, query is ${query}`);
+        if (!engine) return;
+        if (query) {
+            var url = engine.url.replace('%s', encodeURIComponent(query));
+            openUrl(url, event);
+        } else {
+            openUrl(getEngineHome(engine), event);
+        }
+    }
+
+    // 快捷键搜索.
+    // 只能搜索, 不能明确打开引擎主页.
+    function openEngineOnKey(engine, query, event) {
+        openEngine(engine, query, event);
+    }
+
+    // 点击搜索引擎.
+    // 当按下Alt, 则忽略查询词打开引擎主页, 否则正常搜索.
+    function openEngineOnClick(engine, query, event) {
+        if (event.altKey) {
+            openEngine(engine, null, event);
+        } else {
+            openEngine(engine, query, event);
+        }
+    }
+
+    // 点击划词工具条搜索引擎.
+    function openEngineOnClickToolbar(engine, event) {
+        var query = getSelection();
+        openEngineOnClick(engine, query, event);
+    }
+
+    // 点击快搜主窗口搜索引擎.
+    function openEngineOnClickMainBox(engine, event) {
+        var query = quickSearchSearchInput.value.trim();
+        openEngineOnClick(engine, query, event);
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // 元素创建 与 元素事件响应
+    ///////////////////////////////////////////////////////////////////
 
     // 加载css样式
     function loadSheet() {
         var css = document.createElement('style');
         css.type = 'text/css';
-        css.id = 'quick-search-css';
+        css.id = 'qs-css';
         css.textContent = sheet;
         document.getElementsByTagName('head')[0].appendChild(css);
     }
@@ -1277,9 +1392,7 @@
             icon.className = 'qs-toolbar-icon';
             icon.src = engine.icon;
             icon.addEventListener('click', function (e) {
-                var query = getSelection();
-                var url = engine.url.replace('%s', encodeURIComponent(query));
-                GM_openInTab(url);
+                openEngineOnClickToolbar(engine, e);
             }, false);
             toolbar.appendChild(icon);
         });
@@ -1290,7 +1403,7 @@
         icon.className = 'qs-toolbar-icon';
         icon.src = 'data:image/x-icon;base64,AAABAAEAICAAAAEAIACoEAAAFgAAACgAAAAgAAAAQAAAAAEAIAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXE1cXFzIXFxc81xcXN1cXFx0XFxcCVxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcXFwAXFxcAFxcXABcXFxXXFxc51xcXMpcXFyLXFxcsVxcXPFcXFyHXFxcCFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAXFxcAFxcXABcXFwAXFxcWFxcXOxcXFytXFxcGlxcXABcXFwIXFxcfVxcXPRcXFyJXFxcCFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcXFwAXFxcAFxcXFhcXFzsXFxcrVxcXBZcXFwAXFxcAFxcXABcXFwFXFxcfFxcXPRcXFyJXFxcCFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFxXXFxc7FxcXK1cXFwWXFxcAFxcXABcXFwAXFxcAFxcXABcXFwFXFxcfFxcXPRcXFyJXFxcCFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAXFxcUVxcXOhcXFytXFxcFlxcXABcXFwAXFxcAFxcXABcXFwAXFxcAFxcXABcXFwFXFxcfFxcXPRcXFyJXFxcCFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcXFzQXFxcxlxcXBlcXFwAXFxcAFxcXABcXFwCXFxcFVxcXARcXFwAXFxcAFxcXABcXFwFXFxce1xcXPRcXFyKXFxcCFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXPtcXFyAXFxcAFxcXABcXFwAXFxcAFxcXBpcXFzAXFxcelxcXAVcXFwAXFxcAFxcXABcXFwFXFxce1xcXPRcXFyKXFxcCVxcXABcXFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAXFxc6lxcXKNcXFwDXFxcAFxcXABcXFwAXFxcB1xcXIpcXFz0XFxce1xcXARcXFwAXFxcAFxcXABcXFwFXFxce1xcXPRcXFx9XFxcAlxcXAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcXFyGXFxc8VxcXGxcXFwBXFxcAFxcXABcXFwAXFxcCVxcXIpcXFz0XFxce1xcXARcXFwAXFxcAFxcXABcXFwEXFxcj1xcXOZcXFwpXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXA9cXFyYXFxc8lxcXGxcXFwCXFxcAFxcXABcXFwAXFxcCFxcXIpcXFz0XFxce1xcXAVcXFwAXFxcAFxcXABcXFw8XFxc8FxcXE1cXFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAXFxcAFxcXA1cXFyZXFxc8lxcXGxcXFwCXFxcAFxcXABcXFwAXFxcCFxcXIpcXFz0XFxce1xcXAVcXFwAXFxcAFxcXF1cXFzwXFxcPVxcXAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcXFwAXFxcAFxcXA5cXFyZXFxc8lxcXGxcXFwCXFxcAFxcXABcXFwAXFxcCFxcXIpcXFz0XFxce1xcXARcXFwOXFxcxVxcXLlcXFwOXFxcAFxcXABcXFwAXFxcAFxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyZXFxc8lxcXGxcXFwCXFxcAFxcXABcXFwAXFxcCFxcXIpcXFz0XFxce1xcXAtcXFxRXFxcKVxcXABcXFwOXFxcPVxcXE1cXFwpXFxcAlxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyZXFxc8lxcXGxcXFwCXFxcAFxcXABcXFwAXFxcCFxcXIlcXFz0XFxce1xcXAFcXFwAXFxcKVxcXLpcXFzxXFxc8VxcXOZcXFx+XFxcCVxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyZXFxc8lxcXGxcXFwBXFxcAFxcXABcXFwKXFxcDFxcXIlcXFz0XFxce1xcXAFcXFxRXFxcxVxcXF9cXFw/XFxckFxcXPRcXFyKXFxcCVxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyYXFxc8lxcXINcXFw3XFxcW1xcXL9cXFxHXFxcBVxcXIlcXFz0XFxce1xcXAtcXFwOXFxcAFxcXABcXFwEXFxcelxcXPRcXFyLXFxcCVxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA5cXFyKXFxc6VxcXO5cXFzwXFxculxcXChcXFwAXFxcBVxcXIlcXFz0XFxce1xcXARcXFwAXFxcAFxcXABcXFwEXFxcelxcXPRcXFyLXFxcCVxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXANcXFwtXFxcT1xcXD5cXFwOXFxcAFxcXChcXFxIXFxcDFxcXIlcXFz0XFxcfFxcXAVcXFwAXFxcAFxcXABcXFwEXFxcelxcXPRcXFyLXFxcCVxcXABcXFwAXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXABcXFwAXFxcAFxcXABcXFwQXFxcvFxcXL5cXFwKXFxcB1xcXIlcXFz0XFxcfFxcXAVcXFwAXFxcAFxcXABcXFwEXFxcelxcXPRcXFyLXFxcCVxcXABcXFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAXFxcAFxcXENcXFzxXFxcWFxcXABcXFwAXFxcCFxcXIlcXFz0XFxcfFxcXAVcXFwAXFxcAFxcXABcXFwEXFxcelxcXPRcXFyLXFxcCVxcXAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcXFwAXFxcVlxcXO5cXFwzXFxcAFxcXABcXFwAXFxcCFxcXIlcXFz0XFxcfFxcXAVcXFwAXFxcAFxcXABcXFwEXFxcelxcXPRcXFyKXFxcCgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwxXFxc61xcXIJcXFwBXFxcAFxcXABcXFwAXFxcCFxcXIlcXFz0XFxcfFxcXAZcXFwAXFxcAFxcXABcXFwEXFxcelxcXPFcXFx3AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAXFxcAFxcXARcXFyLXFxc8lxcXG1cXFwCXFxcAFxcXABcXFwAXFxcCFxcXIlcXFz0XFxcXVxcXABcXFwAXFxcAFxcXABcXFwHXFxcr1xcXN8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcXFwAXFxcAFxcXA1cXFyYXFxc8lxcXG1cXFwCXFxcAFxcXABcXFwAXFxcClxcXGdcXFw5XFxcAFxcXABcXFwAXFxcAFxcXABcXFyJXFxc9QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyYXFxc8lxcXG1cXFwCXFxcAFxcXABcXFwAXFxcAFxcXABcXFwAXFxcAFxcXABcXFwAXFxcGlxcXMpcXFzKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyXXFxc8lxcXG5cXFwCXFxcAFxcXABcXFwAXFxcAFxcXABcXFwAXFxcAFxcXBdcXFyuXFxc51xcXE4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyXXFxc8lxcXG5cXFwCXFxcAFxcXABcXFwAXFxcAFxcXABcXFwXXFxcrlxcXOxcXFxXXFxcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyXXFxc8lxcXG5cXFwCXFxcAFxcXABcXFwAXFxcF1xcXK5cXFzsXFxcV1xcXABcXFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyXXFxc8lxcXG9cXFwEXFxcAFxcXBlcXFyuXFxc61xcXFdcXFwAXFxcAFxcXAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA1cXFyVXFxc8VxcXKZcXFyCXFxcyFxcXOhcXFxWXFxcAFxcXABcXFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFxcXABcXFwAXFxcAFxcXA5cXFyDXFxc51xcXPlcXFzNXFxcT1xcXABcXFwAXFxcAAAAAAAAAAAAwAP//4AB//8AAP//AAB//wAAP/8AAB//AAAP/wAAD/8AAA//AAAP/wAAD/8AAA//AAAAPwAAAB+AAAAPwAAAB+AAAAPwAAAB+AAAAPwAAAD/8AAA//AAAP/wAAD/8AAA//AAAP/wAAD/+AAA//wAAP/+AAD//wAA//+AAf//wAM=';
         icon.addEventListener('click', function (e) {
-            openUrl(getCompletedUrl(getSelection()), e);
+            openUrl(getUrl().url, e);
         }, false);
         toolbar.appendChild(icon);
 
@@ -1301,6 +1414,7 @@
         icon.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAMAAADDpiTIAAABYmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS40LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iCiAgIHRpZmY6T3JpZW50YXRpb249IjYiLz4KIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InIiPz7UGE7IAAACClBMVEX///9VYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBVYIBzg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79zg79VYIBzg79VYIBzg79zg79VYIBzg79zg79zg79VYIBVYIBVYIBzg79VYIBVYIBzg79VYIBVYIBzg79z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';
         icon.addEventListener('click', function (e) {
             showMainBox();
+            hideToolbar();
         }, false);
         toolbar.appendChild(icon);
 
@@ -1314,6 +1428,8 @@
 
     // 显示划词工具条
     function showToolbar(event) {
+
+        ensureQuickSearchAlive();
 
         if (!quickSearchToolbar || isToolbarVisual()) {
             return;
@@ -1383,9 +1499,7 @@
         searchInput.className = 'qs-main-search-input';
         searchInput.addEventListener('keydown', function (e) {
             if (e.code == 'Enter') {  // 回车键
-                var query = searchInput.value.trim();
-                var url = conf.defaultEngine.url.replace('%s', encodeURIComponent(query));
-                GM_openInTab(url);
+                openEngineOnClickMainBox(conf.defaultEngine, e);
             }
         }, false);
         if (conf.showPlaceholder) {
@@ -1406,9 +1520,7 @@
                 icon.className = 'qs-main-frequent-icon';
                 icon.src = engine.icon;
                 icon.addEventListener('click', function (e) {
-                    var query = searchInput.value.trim();
-                    var url = engine.url.replace('%s', encodeURIComponent(query));
-                    GM_openInTab(url);
+                    openEngineOnClickMainBox(engine, e);
                 }, false);
                 frequentBox.appendChild(icon);
             });
@@ -1440,9 +1552,7 @@
                     engineBox.id = 'qs-main-classified-family-engine-' + fIndex + '-' + eIndex;
                     engineBox.className = 'qs-main-classified-family-engine';
                     engineBox.addEventListener('click', function (e) {
-                        var query = searchInput.value.trim();
-                        var url = engine.url.replace('%s', encodeURIComponent(query));
-                        GM_openInTab(url);
+                        openEngineOnClickMainBox(engine, e);
                     }, false);
                     familyBox.appendChild(engineBox);
                     // 搜索引擎icon
@@ -1504,6 +1614,9 @@
 
     // 显示快搜主窗口
     function showMainBox() {
+
+        ensureQuickSearchAlive();
+
         // 快搜主窗口在iframe中不显示
         if (isMainBoxVisual() || window.self != window.top) {
             return;
@@ -1525,6 +1638,11 @@
 
         // 选中搜索框文本
         quickSearchSearchInput.select();
+
+        // 隐藏划词工具条
+        if (isToolbarVisual()) {
+            hideToolbar();
+        }
     }
 
     // 隐藏快搜主窗口
@@ -1579,7 +1697,7 @@
         saveButton.textContent = '保存';
         saveButton.onclick = function (e) {
             var newConf = JSON.parse(configTextarea.value);
-            GM_setValue('qs-saved-conf', newConf);
+            GM_setValue('qs-conf', newConf);
             hideSettingBox();
             // 需用户手动刷新页面重新加载配置使其生效
             alert('设置已保存, 刷新页面后生效.');
@@ -1597,6 +1715,9 @@
 
     // 显示设置窗口
     function showSettingBox() {
+
+        ensureQuickSearchAlive();
+
         if (isSettingBoxVisual()) {
             return;
         }
@@ -1610,18 +1731,34 @@
         quickSearchSettingBox.style.setProperty('display', 'none', 'important');
     }
 
-    ///////////////////////////////////////////////////////////////////
-    // 主逻辑
-    ///////////////////////////////////////////////////////////////////
-
-    loadSheet();
-    initHotkeyEngineMapping();
-    if (conf.showToolbar) {
-        createToolbar();
+    function initQuickSearch() {
+        loadSheet();
+        initHotkeyEngineMapping();
+        if (conf.showToolbar) {
+            createToolbar();
+        }
+        createMainBox();
+        createSettingBox();
     }
-    createMainBox();
-    createSettingBox();
 
+    // 百度等网页会在不刷新页面的情况下改变网页内容, 导致quick search除了js脚本之外的东东全部没了.
+    // 此函数用于确保quick search处于可用状态, 需在toolbar或mainbox等窗口每次显示时调用.
+    function ensureQuickSearchAlive() {
+        var css = document.querySelector('#qs-css');
+        var mainbox = document.querySelector('#qs-mainbox');
+        if (!css || !mainbox) {
+            initQuickSearch();
+        }
+    }
+
+    initQuickSearch();
+
+    ///////////////////////////////////////////////////////////////////
+    // 全局事件响应
+    //
+    // 我们将全局事件绑定在捕获阶段执行, 避免事件响应被网页自带的脚本拦截掉.
+    ///////////////////////////////////////////////////////////////////
+    
     //
     // top window和iframe共用的事件处理逻辑
     //
@@ -1634,7 +1771,7 @@
                 GM_setClipboard(selection, 'text/plain');
             }
         }
-    });
+    }, true);
 
     window.addEventListener('keydown', function (e) {
 
@@ -1642,7 +1779,7 @@
             return;
         }
 
-        // 锁定/解锁快搜所有功能
+        // (Alt+)l键, 锁定/解锁快搜所有功能.
         if (e.code == 'KeyL') {
             e.preventDefault();
             quickSearchPageLock = quickSearchPageLock ? false : true;
@@ -1653,98 +1790,55 @@
             return;
         }
 
-        // s键, 超级快搜. 优先级如下:
+        // (Alt+)s键, 超级快搜. 优先级如下:
         // 1. 快搜主窗口可见, 使用默认搜索引擎搜索搜索框文本.
         // 2. 网页有选中文本, 使用默认搜索引擎搜索文本.
-        // 3. 挑选当前搜索引擎分类中的另一个搜索引擎, 搜索当前引擎的搜索词.
+        // 3. 当前页面url中有搜索词, 挑选当前搜索引擎分类中的另一个搜索引擎搜索该词.
+        // 4. 都没有则打开快搜主窗口.
         if (e.code == 'KeyS') {
             e.preventDefault();
 
             var engine = null;
-            var query = null;
-            if (isMainBoxVisual()) {
+            var query = getQuery();
+            if (query.source == 'mainbox' || query.source == 'selection') {
                 engine = conf.defaultEngine;
-                query = quickSearchSearchInput.value.trim();
-            } else {
-                var selection = getSelection();
-                if (selection) {
-                    engine = conf.defaultEngine;
-                    query = selection;
-                } else {
-                    var nowEngineInfo = getMatchedEngineInfo();
-                    if (nowEngineInfo) {
-                        var nowClassEngines = nowEngineInfo.classEngines.engines;
-                        nowClassEngines.forEach((eng, i) => {
-                            if (!engine && eng.enable && i != nowEngineInfo.index) {
-                                engine = eng;
-                            }
-                        });
-                    }
-                    query = getUrlQuery();
+            } else if (query.source == 'url') {
+                var nowEngineInfo = getMatchedEngineInfo();
+                if (nowEngineInfo) {
+                    var nowClassEngines = nowEngineInfo.classEngines.engines;
+                    nowClassEngines.forEach((eng, i) => {
+                        if (!engine && eng.enable && i != nowEngineInfo.index) {
+                            engine = eng;
+                        }
+                    });
                 }
             }
-            if (engine && query) {
-                var url = engine.url.replace('%s', encodeURIComponent(query));
-                openUrl(url, e);
+            
+            if (engine) {
+                openEngineOnKey(engine, query.query, e);
+            } else if (!isMainBoxVisual()) {
+                showMainBox();
             }
 
             return;
         }
 
-        // d键, 网址直达. 网址优先级: 搜索框已有网址(若快搜主窗口可见) > 网页选中网址 > 当前网站主页
+        // (Alt+)d键, 网址直达. 网址优先级: 搜索框已有网址(若快搜主窗口可见) > 网页中选中网址
         if (e.code == 'KeyD') {
             e.preventDefault();
-
-            var url = null;
-            if (isMainBoxVisual()) {
-                url = quickSearchSearchInput.value.trim();
-            } else {
-                url = getSelection();
-                if (!url) {
-                    var l = window.location;
-                    url = `${l.protocol}//${l.hostname}/`;
-                }
-            }
-            if (url) {
-                url = getCompletedUrl(url);
-                openUrl(url, e);
-            }
-            
+            openUrl(getUrl().url, e);
             return;
         }
 
-        // 自定义快捷键搜索. 文本优先级: 搜索框已有文本(若快搜主窗口可见) > 网页选中文本 > 当前页面搜索词
+        // (Alt+)自定义快捷键搜索. 文本优先级: 搜索框已有文本(若快搜主窗口可见) > 网页中选中文本 > 当前页面搜索词
         if (hotkeyEngineMapping[e.code]) {
             e.preventDefault();
-
             var engine = hotkeyEngineMapping[e.code];
-
-            var query = null;
-            if (isMainBoxVisual()) {
-                query = quickSearchSearchInput.value.trim();
-            } else {
-                query = getSelection();
-                if (!query) {
-                    query = getUrlQuery();
-                }
-            }
-            
-            var url = null;
-            if (query) {
-                url = engine.url.replace('%s', encodeURIComponent(query));
-            } else {
-                url = engine.home;
-                if (!url) {
-                    var u = new URL(engine.url);
-                    url = `${u.protocol}//${u.hostname}/`;
-                }
-            }
-
-            GM_openInTab(url);
-
+            var query = getQuery();
+            openEngineOnKey(engine, query.query, e);
             return;
         }
-    });
+    }, true);
 
     //
     // 只在top window中使用的事件处理逻辑
@@ -1761,7 +1855,7 @@
             if (isMainBoxVisual() && !isSettingBoxVisual() && !quickSearchMainBox.contains(target)) {
                 hideMainBox();
             }
-        }, false);
+        }, true);
 
         window.addEventListener('mouseup', function (e) {
             // 显示/隐藏工具条
@@ -1774,7 +1868,7 @@
                     hideToolbar();
                 }
             }
-        }, false);
+        }, true);
 
         // 有时候selectionchange发生在mouseup之后, 导致没有selection时toolbar依然显示.
         // 故再添加selectionchange事件以隐藏toolbar.
@@ -1784,7 +1878,7 @@
             if (!selection && isToolbarVisual()) {
                 hideToolbar();
             }
-        });
+        }, true);
 
         window.addEventListener('keydown', function (e) {
 
@@ -1792,7 +1886,7 @@
                 return;
             }
 
-            // f键, 显示/隐藏快搜主窗口
+            // (Alt+)f键, 显示/隐藏快搜主窗口
             if (e.code == 'KeyF') {
                 e.preventDefault();
                 if (!isMainBoxVisual()) {
@@ -1808,7 +1902,7 @@
                     hideMainBox();
                 }
             }
-        }, false);
+        }, true);
     }
 
     //
