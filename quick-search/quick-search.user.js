@@ -1188,7 +1188,8 @@
         return url.substring(domain.length);
     }
 
-    // 获取当前页面url中的搜索词
+    // 获取当前页面url中的搜索词.
+    // 返回值没有经过URI解码, 即为URI编码的非明文字符串.
     //
     // 如果当前页面在配置的搜索引擎列表中, 尝试从url中解析参数, 分为engine.url中含有问号(?)和不含问号(?)两种情况.
     // 如果没有解析到或者当前页面不在配置的搜索引擎列表中, 尝试获取文本(纯数字除外)在url中完整出现的input/textarea的值.
@@ -1410,6 +1411,18 @@
     function openEngineOnClickMainBox(engine, event) {
         var query = quickSearchSearchInput.value.trim();
         openEngineOnClick(engine, query, event);
+    }
+
+    // 切换快搜page lock状态
+    function toggleQuickSearchPageLock() {
+        quickSearchPageLock = quickSearchPageLock ? false : true;
+        if (quickSearchPageLock) {
+            hideToolbar();
+            hideMainBox();
+            showInfoTipsLayer('已禁用(🔒)');
+        } else {
+            showInfoTipsLayer('已启用(🚀)');
+        }
     }
 
     ///////////////////////////////////////////////////////////////////
@@ -1672,8 +1685,10 @@
         return quickSearchMainBox.style.display == 'block';
     }
 
-    // 显示快搜主窗口
-    function showMainBox() {
+    // 显示快搜主窗口.
+    // 可选输入text为没有经过URI编码的明文文本, 该参数一般在iframe发来消息时使用.
+    // 快搜主窗口中搜索框的文本优先级: 参数指定文本 > 网页选中文本 > 搜索框已有文本 > 当前页面搜索词
+    function showMainBox(text) {
 
         ensureQuickSearchAlive();
 
@@ -1682,16 +1697,21 @@
             return;
         }
         
-        // 设置搜索框内容, 文本优先级: 网页选中文本 > 搜索框已有文本 > 当前页面搜索词
-        var selection = getSelection();
-        if (selection) {
-            quickSearchSearchInput.value = selection;
-        } else if (!quickSearchSearchInput.value.trim()) {
-            var query = getUrlQuery();
+        // 设置搜索框内容
+        var query = text;
+        if (!query) {
+            query = getSelection();
+        }
+        if (!query) {
+            query = quickSearchSearchInput.value.trim();
+        }
+        if (!query) {
+            query = getUrlQuery();
             if (query) {
-                quickSearchSearchInput.value = decodeURIComponent(query);
+                query = decodeURIComponent(query);
             }
         }
+        quickSearchSearchInput.value = query;
 
         quickSearchBackgroundLayer.style.setProperty('display', 'block', 'important');
         quickSearchMainBox.style.setProperty('display', 'block', 'important');
@@ -1848,7 +1868,26 @@
     // top window和iframe共用的事件处理逻辑
     //
 
+    window.addEventListener('mousedown', function (e) {
+        var target = e.target;
+        // 隐藏工具条
+        if (isToolbarVisual() && !quickSearchToolbar.contains(target)) {
+            hideToolbar();
+        }
+    }, true);
+
     window.addEventListener('mouseup', function (e) {
+        // 显示/隐藏工具条
+        if (isAllowToolbar(e)) {
+            var selection = getSelection();
+            if (selection && !isToolbarVisual()) {
+                showToolbar(e);
+            }
+            if (!selection && isToolbarVisual()) {
+                hideToolbar();
+            }
+        }
+
         // 划词时自动复制文本到剪贴板
         if (conf.autoCopyToClipboard) {
             var selection = getSelection();
@@ -1858,23 +1897,19 @@
         }
     }, true);
 
+    // 有时候selectionchange发生在mouseup之后, 导致没有selection时toolbar依然显示.
+    // 故再添加selectionchange事件以隐藏toolbar.
+    // 由于在鼠标划词拖动过程中会不停触发selectionchange事件, 所以最好不要以此事件来显示/调整toolbar位置.
+    document.addEventListener('selectionchange', function (e) {
+        var selection = getSelection();
+        if (!selection && isToolbarVisual()) {
+            hideToolbar();
+        }
+    }, true);
+
     window.addEventListener('keydown', function (e) {
 
         if (!isAllowHotkey(e)) {
-            return;
-        }
-
-        // (Alt+)l键, 锁定/解锁快搜所有功能.
-        if (e.code == 'KeyL') {
-            e.preventDefault();
-            quickSearchPageLock = quickSearchPageLock ? false : true;
-            if (quickSearchPageLock) {
-                hideToolbar();
-                hideMainBox();
-                showInfoTipsLayer('已禁用(🔒)');
-            } else {
-                showInfoTipsLayer('已启用(🚀)');
-            }
             return;
         }
 
@@ -1935,36 +1970,9 @@
     if (window.self == window.top) {
         window.addEventListener('mousedown', function (e) {
             var target = e.target;
-            // 隐藏工具条
-            if (isToolbarVisual() && !quickSearchToolbar.contains(target)) {
-                hideToolbar();
-            }
             // 隐藏快搜主窗口
             if (isMainBoxVisual() && !isSettingBoxVisual() && !quickSearchMainBox.contains(target)) {
                 hideMainBox();
-            }
-        }, true);
-
-        window.addEventListener('mouseup', function (e) {
-            // 显示/隐藏工具条
-            if (isAllowToolbar(e)) {
-                var selection = getSelection();
-                if (selection && !isToolbarVisual()) {
-                    showToolbar(e);
-                }
-                if (!selection && isToolbarVisual()) {
-                    hideToolbar();
-                }
-            }
-        }, true);
-
-        // 有时候selectionchange发生在mouseup之后, 导致没有selection时toolbar依然显示.
-        // 故再添加selectionchange事件以隐藏toolbar.
-        // 由于在鼠标划词拖动过程中会不停触发selectionchange事件, 所以最好不要以此事件来显示/调整toolbar位置.
-        document.addEventListener('selectionchange', function (e) {
-            var selection = getSelection();
-            if (!selection && isToolbarVisual()) {
-                hideToolbar();
             }
         }, true);
 
@@ -1990,6 +1998,29 @@
                     hideMainBox();
                 }
             }
+
+            // (Alt+)l键, 锁定/解锁快搜所有功能.
+            if (e.code == 'KeyL') {
+                e.preventDefault();
+                toggleQuickSearchPageLock();
+                return;
+            }
+        }, true);
+
+        // 处理iframe发来的消息
+        window.addEventListener('message', function (e) {
+            if (e.data.source != 'qs-iframe') {
+                return;
+            }
+
+            if (e.data.keydown) {
+                if (e.data.keydown == 'KeyF') {
+                    showMainBox(e.data.query);
+                }
+                if (e.data.keydown == 'KeyL') {
+                    toggleQuickSearchPageLock();
+                }
+            }
         }, true);
     }
 
@@ -1998,6 +2029,23 @@
     //
 
     if (window.self != window.top) {
-
+        // 向top窗口发送消息
+        window.addEventListener('keydown', function (e) {
+            if (e.code == 'KeyF') {
+                var query = getSelection();
+                // 跨域iframe中不能执行window.top.origin, 故此处使用*
+                window.top.postMessage({
+                    source: 'qs-iframe',
+                    keydown: 'KeyF',
+                    query: query
+                }, '*');
+            }
+            if (e.code == 'KeyL') {
+                window.top.postMessage({
+                    source: 'qs-iframe',
+                    keydown: 'KeyL'
+                }, '*');
+            }
+        }, true);
     }
 })();
