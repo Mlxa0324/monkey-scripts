@@ -34,7 +34,8 @@ F键/Alt+F键 打开/关闭快搜主窗口, 当搜索框中没有文本或同时
 
 # 安装
 
-- Greasy Fork: 
+- Greasy Fork: https://greasyfork.org/zh-CN/scripts/408250
+- GitHub: https://github.com/smallx/monkey-scripts/raw/master/quick-search/quick-search.user.js
 
 # 推荐脚本
 
