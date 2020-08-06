@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Multi Search - 多搜索引擎搜索
 // @namespace   Violentmonkey Scripts
-// @version     1.1
+// @version     1.2
 // @author      smallx
 // @description 一个可以同时搜索多个搜索引擎并将结果并排显示的油猴脚本 | 谷歌百度同时搜索并排显示
 // @homepageURL https://github.com/smallx/multi-search
@@ -182,14 +182,29 @@
             var docWidth = document.body.scrollWidth;
             var docHeight = document.body.scrollHeight;
             var query = getQuery('//input[@name="q"]');
+
             // 百度
             // 一次搜索10条
-            doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=10', query, 165, docWidth - 585, 583, docHeight - 235, -107, -120);
+            doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=10', query, 133, docWidth - 585, 583, docHeight - 235, -107, -120);
+            // 一次搜索20条
+            // doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=20', query, 133, docWidth - 585, 583, docHeight * 2 - 500, -107, -120);
+            
+            // StackOverflow(谷歌)
+            // doOneSearch('stackoverflow_google', 'https://www.google.com/search?q=%s+site%3Astackoverflow.com&num=10&igu=1&newwindow=1', query, 138, docWidth, 710, docHeight - 220, -138, -150);
+
+            //
+            // 下面的只调整了坐标, 以适配同时安装"searchEngineJump 搜索引擎快捷跳转"的情况
+            //
+
+            // 百度
+            // 一次搜索10条
+            // doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=10', query, 165, docWidth - 585, 583, docHeight - 235, -107, -120);
             // 一次搜索20条
             // doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=20', query, 165, docWidth - 585, 583, docHeight * 2 - 500, -107, -120);
             
             // StackOverflow(谷歌)
             // doOneSearch('stackoverflow_google', 'https://www.google.com/search?q=%s+site%3Astackoverflow.com&num=10&igu=1&newwindow=1', query, 165, docWidth, 710, docHeight - 220, -138, -150);
+            
             ////////////////////////////////////////
             // 如果想要多添加几个搜索引擎, 放在这, 下同 //
             // /////////////////////////////////////
@@ -217,11 +232,22 @@
             var docWidth = document.body.scrollWidth;
             var docHeight = document.body.scrollHeight;
             var query = getQuery('//input[@id="kw"]');
+
             // 谷歌
             // 加入参数 igu=1 使谷歌可以在iframe中显示, 否则会被Google拒绝
             // 加入参数 newwindow=1 使谷歌搜索结果默认新窗口打开
             // 一次搜索10条
-            doOneSearch('google', 'https://www.google.com/search?q=%s&num=10&igu=1&newwindow=1', query, 140, docWidth - 711, 710, docHeight - 220, -138, -150);
+            doOneSearch('google', 'https://www.google.com/search?q=%s&num=10&igu=1&newwindow=1', query, 112, docWidth - 711, 710, docHeight - 220, -138, -150);
+            // 一次搜索20条
+            // doOneSearch('google', 'https://www.google.com/search?q=%s&num=20&igu=1&newwindow=1', query, 112, docWidth - 711, 710, docHeight * 2 - 200, -138, -150);
+            
+            //
+            // 下面的只调整了坐标, 以适配同时安装"searchEngineJump 搜索引擎快捷跳转"的情况
+            //
+
+            // 谷歌
+            // 一次搜索10条
+            // doOneSearch('google', 'https://www.google.com/search?q=%s&num=10&igu=1&newwindow=1', query, 140, docWidth - 711, 710, docHeight - 220, -138, -150);
             // 一次搜索20条
             // doOneSearch('google', 'https://www.google.com/search?q=%s&num=20&igu=1&newwindow=1', query, 140, docWidth - 711, 710, docHeight * 2 - 200, -138, -150);
         }
@@ -235,8 +261,16 @@
             var docWidth = document.body.scrollWidth;
             var docHeight = document.body.scrollHeight;
             var query = getQuery('//input[@id="sb_form_q"]');
+            
             // 百度
-            doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=10', query, 188, docWidth - 650, 590, docHeight - 250, -107, -120);
+            doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=10', query, 167, docWidth - 650, 590, docHeight - 250, -107, -120);
+            
+            //
+            // 下面的只调整了坐标, 以适配同时安装"searchEngineJump 搜索引擎快捷跳转"的情况
+            //
+
+            // 百度
+            // doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=10', query, 188, docWidth - 650, 590, docHeight - 250, -107, -120);
         }
         if (isUrlMatched(/^https?:\/\/[^.]*\.bing\.com\/search/)) {
             bingPageMultiSearch();
