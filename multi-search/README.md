@@ -13,39 +13,32 @@ Multi Search - 一个可以同时搜索多个搜索引擎并将结果并排显�
 
 ## 谷歌 + 百度
 
-![google_baidu](https://github.com/smallx/multi-search/raw/master/images/google_baidu.gif)
+![google_baidu](https://github.com/smallx/monkey-scripts/raw/master/multi-search/images/google_baidu.gif)
 
 ## 百度 + 谷歌
 
-![baidu_google](https://github.com/smallx/multi-search/raw/master/images/baidu_google.gif)
+![baidu_google](https://github.com/smallx/monkey-scripts/raw/master/multi-search/images/baidu_google.gif)
 
 # 安装
 
 - [Greasy Fork](https://greasyfork.org/zh-CN/scripts/407794)
-- [GitHub](https://github.com/smallx/multi-search/raw/master/multi-search.user.js)
+- [GitHub](https://github.com/smallx/monkey-scripts/raw/master/multi-search/multi-search.user.js)
 
 ## Opera注意事项
 
 Opera浏览器中需要勾选Tampermonkey插件的"允许访问搜索页面结果"选项, 否则该脚本不能生效, 如下:
 
-![opera](https://github.com/smallx/multi-search/raw/master/images/opera.png)
+![opera](https://github.com/smallx/monkey-scripts/raw/master/multi-search/images/opera.png)
 
 # 推荐脚本
 
 Multi Search 配合如下油猴脚本使用效果更佳:
 
-## searchEngineJump 搜索引擎快捷跳转
+## Quick Search - 快速搜索
 
-[searchEngineJump 搜索引擎快捷跳转](https://greasyfork.org/zh-CN/scripts/27752)
+[Quick Search - 快速搜索](https://greasyfork.org/zh-CN/scripts/408250)
 
-我做了一个修改版的, 见 https://github.com/smallx/searchEngineJump
-
-主要优化内容如下:
-- 修复和优化样式 使其更美观
-- icon替换为高清版 使其更美观
-- 去除动画 快速高效
-- 修改默认的搜索引擎配置 使其更符合自己
-- 去掉非必要代码
+我自己开发的, 无缝集成 划词搜索 + 快捷键搜索 + 搜索跳转 + 网址导航, 享受丝滑搜索体验.
 
 ## Super_preloaderPlus_one_改
 
@@ -81,4 +74,4 @@ Multi Search 配合如下油猴脚本使用效果更佳:
 
 欢迎在GitHub Issue中反馈问题.
 
-GitHub地址: https://github.com/smallx/multi-search
+GitHub地址: https://github.com/smallx/monkey-scripts/tree/master/multi-search
