@@ -20,7 +20,7 @@ Quick Search - 快速搜索. 无缝集成 划词搜索 + 快捷键搜索 + 搜�
 
 当光标位于输入框(input/textarea)中时, 上述单字符的快捷键都不会启用, 需同时按下Alt键(在Mac下对应option键).
 
-如果同时按下Cmd(Mac系统下)/Ctrl(Windows或Linux系统下) + Alt, 上述快捷键会在后台打开新页面.
+如果同时按下Cmd(Mac系统下)/Ctrl(Windows和Linux系统下) + Alt, 上述快捷键会在后台打开新页面.
 
 ## 搜索跳转
 
