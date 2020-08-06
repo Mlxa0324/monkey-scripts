@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Quick Search - 快速搜索
 // @namespace   Violentmonkey Scripts
-// @version     1.0
+// @version     1.1
 // @author      smallx
 // @description 无缝集成 划词搜索 + 快捷键搜索 + 搜索跳转 + 网址导航, 享受丝滑搜索体验
 // @homepageURL 
@@ -1130,6 +1130,25 @@
     // 功能函数
     ///////////////////////////////////////////////////////////////////
 
+    // 获取元素style属性, 包括css中的
+    function getStyleByElement(e, styleProp) {
+        if (window.getComputedStyle) {
+            return document.defaultView.getComputedStyle(e, null).getPropertyValue(styleProp);
+        } else if (e.currentStyle) {
+            return e.currentStyle[styleProp];
+        }
+    }
+
+    // 计算元素在文档(页面)中的绝对位置
+    function getElementPosition(e) {
+        return {
+            top: e.getBoundingClientRect().top + window.scrollY,        // 元素顶部相对于文档顶部距离
+            bottom: e.getBoundingClientRect().bottom + window.scrollY,  // 元素底部相对于文档顶部距离
+            left: e.getBoundingClientRect().left + window.scrollX,      // 元素左边相对于文档左侧距离
+            right: e.getBoundingClientRect().right + window.scrollX     // 元素右边相对于文档左侧距离
+        };
+    }
+
     // 获取可视窗口在文档(页面)中的绝对位置
     function getWindowPosition() {
         return {
@@ -1138,6 +1157,25 @@
             left: window.scrollX,
             right: window.scrollX + window.innerWidth
         };
+    }
+
+    // 判断元素在文档(页面)中是否可见
+    function isVisualOnPage(ele) {
+        if (getStyleByElement(ele, 'display') == 'none'
+        || getStyleByElement(ele, 'visibility') == 'hidden'
+        || getStyleByElement(ele, 'opacity') == '0') {
+            return false;
+        }
+        if (getStyleByElement(ele, 'position') != 'fixed'
+        && ele.offsetParent == null) {
+            return false;
+        }
+        var elePos = getElementPosition(ele);
+        if (elePos.bottom - elePos.top == 0 || elePos.right - elePos.left == 0
+        || elePos.bottom <= 0 || elePos.right <= 0) {
+            return false;
+        }
+        return true;
     }
 
     // 获取选中文本
@@ -1190,14 +1228,11 @@
     }
 
     // 获取当前页面url中的搜索词.
-    // 返回值没有经过URI解码, 即为URI编码的非明文字符串.
+    // 返回值为经过URI解码的明文文本.
     //
     // 如果当前页面在配置的搜索引擎列表中, 尝试从url中解析参数, 分为engine.url中含有问号(?)和不含问号(?)两种情况.
     // 如果没有解析到或者当前页面不在配置的搜索引擎列表中, 尝试获取文本(纯数字除外)在url中完整出现的input/textarea的值.
     // 如果还是没有, 则认为当前页面url中没有搜索词.
-    //
-    // TODO 可优化项: 将url按照 / ? & # 拆分为part, 然后判断哪个input/textarea的值与part完全相等, 当然纯数字依然除外.
-    // TODO 可优化项: 只判断哪些可以被看到或者能获取到坐标位置的input/textarea元素.
     function getUrlQuery() {
 
         var urlTail = removeUrlDomain(window.location.href);
@@ -1212,19 +1247,19 @@
                 var query = params.get(queryKey);
                 if (query) {
                     console.log(`Quick Search: get query by URL-KV, engine is ${engine.url}`);
-                    return query;
+                    return decodeURIComponent(query);
                 }
             } else {    // engine.url中没有问号(?)
                 var parts = removeUrlDomain(engine.url).split('%s');
                 if (parts.length == 2 && urlTail.startsWith(parts[0]) && urlTail.endsWith(parts[1])) {
                     var query = urlTail.substring(parts[0].length, urlTail.length - parts[1].length);
-                    var index = query.search(/[\/\?\&\#]/);   // 是否含有 / ? & #
+                    var index = query.search(/[\/\?\=\&\#]/);   // 是否含有 / ? = & #
                     if (index != -1) {
                         query = query.substring(0, index);
                     }
                     if (query) {
                         console.log(`Quick Search: get query by URL-PART, engine is ${engine.url}`);
-                        return query;
+                        return decodeURIComponent(query);
                     }
                 }
             }
@@ -1233,12 +1268,20 @@
         // 尝试获取文本(纯数字除外)在url中完整出现的input/textarea的值
         var eles = document.querySelectorAll('input, textarea');
         for (var ele of eles) {
-            var eleValue = ele.value.trim();
-            if (eleValue && !/^\d+$/.test(eleValue)) {
-                var encodedEleValue = encodeURIComponent(eleValue);
-                if (urlTail.includes(encodedEleValue)) {
-                    console.log(`Quick Search: get query by ${ele.tagName}[id='${ele.id}'], engine is ${engine ? engine.url : 'NULL'}`);
-                    return encodedEleValue;
+            if (isVisualOnPage(ele) && !quickSearchMainBox.contains(ele) && !quickSearchSettingBox.contains(ele)) {
+                var eleValue = ele.value.trim();
+                if (eleValue && !/^\d+$/.test(eleValue)) {
+                    var encodedEleValue = encodeURIComponent(eleValue);
+                    var index = urlTail.indexOf(encodedEleValue);
+                    if (index != -1) {
+                        var leftChar = urlTail[index - 1];
+                        var rightChar = urlTail[index + encodedEleValue.length];
+                        if ((!leftChar || /[\/\=\#]/.test(leftChar))
+                        && (!rightChar || /[\/\?\&\#]/.test(rightChar))) {
+                            console.log(`Quick Search: get query by ${ele.tagName}[id='${ele.id}'], engine is ${engine ? engine.url : 'NULL'}`);
+                            return eleValue;
+                        }
+                    }
                 }
             }
         }
@@ -1709,9 +1752,6 @@
         }
         if (!query) {
             query = getUrlQuery();
-            if (query) {
-                query = decodeURIComponent(query);
-            }
         }
         quickSearchSearchInput.value = query;
 
@@ -1880,6 +1920,7 @@
     }, true);
 
     window.addEventListener('mouseup', function (e) {
+        var target = e.target;
         // 显示/隐藏工具条
         if (isAllowToolbar(e)) {
             var selection = getSelection();
@@ -1892,7 +1933,9 @@
         }
 
         // 划词时自动复制文本到剪贴板
-        if (conf.autoCopyToClipboard) {
+        if (conf.autoCopyToClipboard
+        && target.tagName != 'INPUT' && target.tagName != 'TEXTAREA'
+        && !quickSearchMainBox.contains(target) && !quickSearchSettingBox.contains(target)) {
             var selection = getSelection();
             if (selection) {
                 GM_setClipboard(selection, 'text/plain');
@@ -1916,7 +1959,7 @@
             return;
         }
 
-        // (Alt+)s键, 超级快搜. 优先级如下:
+        // (Alt+)S键, 超级快搜. 优先级如下:
         // 1. 快搜主窗口可见, 使用默认搜索引擎搜索搜索框文本.
         // 2. 网页有选中文本, 使用默认搜索引擎搜索文本.
         // 3. 当前页面url中有搜索词, 挑选当前搜索引擎分类中的另一个搜索引擎搜索该词.
@@ -1940,16 +1983,18 @@
                 }
             }
             
-            if (engine) {
+            if (engine && query.query) {
                 openEngineOnKey(engine, query.query, e);
             } else if (!isMainBoxVisual()) {
                 showMainBox();
+            } else {
+                hideMainBox();
             }
 
             return;
         }
 
-        // (Alt+)d键, 网址直达. 网址优先级: 搜索框已有网址(若快搜主窗口可见) > 网页中选中网址
+        // (Alt+)D键, 网址直达. 网址优先级: 搜索框已有网址(若快搜主窗口可见) > 网页中选中网址
         if (e.code == 'KeyD') {
             e.preventDefault();
             openUrl(getUrl().url, e);
@@ -1985,7 +2030,7 @@
                 return;
             }
 
-            // (Alt+)f键, 显示/隐藏快搜主窗口
+            // (Alt+)F键, 显示/隐藏快搜主窗口
             if (e.code == 'KeyF') {
                 e.preventDefault();
                 if (!isMainBoxVisual()) {
@@ -1996,7 +2041,7 @@
                 return;
             }
 
-            // esc键, 隐藏快搜主窗口
+            // Esc键, 隐藏快搜主窗口
             if (e.code == 'Escape') {
                 if (isMainBoxVisual() && !isSettingBoxVisual()) {
                     hideMainBox();
@@ -2004,7 +2049,7 @@
                 return;
             }
 
-            // (Alt+)l键, 锁定/解锁快搜所有功能.
+            // (Alt+)L键, 锁定/解锁快搜所有功能.
             if (e.code == 'KeyL') {
                 e.preventDefault();
                 toggleQuickSearchPageLock();
