@@ -39,7 +39,7 @@
         };
     }
 
-    // 判断元素是否可以被看到, 输入为 元素位置, 可视窗口位置, 可视窗口上下左右被覆盖的尺寸(比如顶部导航栏覆盖)
+    // 判断元素在当前人眼可视窗口中是否可以被看到, 输入为 元素位置, 可视窗口位置, 可视窗口上下左右被覆盖的尺寸(比如顶部导航栏覆盖)
     function isVisual(ePos, wPos, topCover, bottomCover, leftCover, rightCover) {
         return !(
             ePos.bottom <= wPos.top + topCover
