@@ -18,9 +18,9 @@ Quick Search - 快速搜索. 无缝集成 划词搜索 + 快捷键搜索 + 搜�
 - **随时锁定**: L键/Alt+L键 在当前页面禁用/启用快搜所有功能.
 - **自定义搜索引擎**: W键/Alt+W键 wiki(百度百科), E键/Alt+E键 english(百度翻译), B键/Alt+B键 百度, G键/Alt+G键 谷歌.
 
-当光标位于输入框(input/textarea)中时, 上述单字符的快捷键都不会启用, 需同时按下Alt键.
+当光标位于输入框(input/textarea)中时, 上述单字符的快捷键都不会启用, 需同时按下Alt键(在Mac下对应option键).
 
-如果同时按下Cmd或Ctrl(此时Alt也需要按下才生效), 上述快捷键会在后台打开新页面.
+如果同时按下Cmd(Mac系统下)/Ctrl(Windows或Linux系统下) + Alt, 上述快捷键会在后台打开新页面.
 
 ## 搜索跳转
 
