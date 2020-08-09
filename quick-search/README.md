@@ -4,6 +4,8 @@ Quick Search - 快速搜索. 无缝集成 划词搜索 + 快捷键搜索 + 搜�
 
 ![quick-search](https://github.com/smallx/monkey-scripts/raw/master/quick-search/images/quick-search-1.gif)
 
+![quick-search](https://github.com/smallx/monkey-scripts/raw/master/quick-search/images/quick-search-2.gif)
+
 # 功能
 
 ## 划词搜索
@@ -37,6 +39,12 @@ F键/Alt+F键 打开/关闭快搜主窗口, 当搜索框中没有文本或同时
 - Greasy Fork: https://greasyfork.org/zh-CN/scripts/408250
 - GitHub: https://github.com/smallx/monkey-scripts/raw/master/quick-search/quick-search.user.js
 
+## Tampermonkey权限
+
+由于脚本需要请求百度/谷歌获取搜索建议, 所以有跨域url请求, 需要在Tampermonkey中开启相应权限, 如下:
+
+![tampermonkey](https://github.com/smallx/monkey-scripts/raw/master/quick-search/images/tampermonkey-1.png)
+
 # 推荐脚本
 
 ## Multi Search - 多搜索引擎搜索
@@ -59,6 +67,10 @@ F键/Alt+F键 打开/关闭快搜主窗口, 当搜索框中没有文本或同时
 
 # 更新日志
 
+## v1.2 20200809
+
+- 增加搜索引擎建议功能, 默认 5条Google + 5条百度 搜索建议.
+
 ## v1.1 20200806
 
 - 优化: 从url中自动获取搜索词更加准确
@@ -77,7 +89,7 @@ F键/Alt+F键 打开/关闭快搜主窗口, 当搜索框中没有文本或同时
 
 # TODO
 
-由于油猴脚本的限制, 访问书签/历史记录等难以实现, 若有兴趣或考虑做成chrome插件, 让搜索更丝滑一些.
+~~由于油猴脚本的限制, 访问书签/历史记录等难以实现, 若有兴趣或考虑做成chrome插件, 让搜索更丝滑一些.~~
 
 # 问题反馈
 

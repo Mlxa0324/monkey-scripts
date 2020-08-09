@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Quick Search - 快速搜索
 // @namespace   Violentmonkey Scripts
-// @version     1.1
+// @version     1.2
 // @author      smallx
 // @description 无缝集成 划词搜索 + 快捷键搜索 + 搜索跳转 + 网址导航, 享受丝滑搜索体验
 // @homepageURL 
@@ -12,6 +12,7 @@
 // @grant       GM_setClipboard
 // @grant       GM_getValue
 // @grant       GM_setValue
+// @grant       GM_xmlhttpRequest
 // @run-at      document-end
 // ==/UserScript==
 
@@ -24,7 +25,7 @@
 
     const defaultConf = {
         //
-        // 一些开关
+        // 基本配置
         //
         showToolbar: true,              // 显示划词工具条
         showFrequentEngines: true,      // 显示常用搜索引擎
@@ -32,6 +33,22 @@
         showPlaceholder: true,          // 显示使用方式提示信息(如搜索框placeholder)
         enableOnInput: true,            // 是否在input/textarea上启用划词和快捷键
         autoCopyToClipboard: true,      // 划词时自动复制到剪贴板(内容为文本格式)
+        //
+        // 搜索建议配置
+        //
+        // 可选值baidu|google, 可根据需要调整顺序
+        engineSuggestions: [
+            {
+                name: 'google',
+                showCount: 5,
+                enable: true
+            },
+            {
+                name: 'baidu',
+                showCount: 5,
+                enable: true
+            },
+        ],
         //
         // 搜索框默认搜索引擎
         // 属性:
@@ -352,15 +369,15 @@
                         enable: true
                     },
                     {
-                        name: '有道词典',
-                        url: 'https://youdao.com/w/%s',
-                        icon: 'data:image/png;base64,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',
-                        enable: true
-                    },
-                    {
                         name: '谷歌翻译',
                         url: 'https://translate.google.com/?q=%s',
                         icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAC9FBMVEUAAABznO9RjvNPje9RkPFNh+yAgL9RguBNh+pPjO1mZsxMetnf39/R0dvi4uJLie9JgORHhep7hMJmd6pkdbl9iMNmd7vS0tZ3g7bQ0NOKiqhVkfVVkPVUkPVTkPVSj/VRjvVSkPVRj/VQjvVPjvVPjfVOjfVqmezQ0djj4+bn5+jn5+fm5ubl5eXk5OSFr/PM2vHs7e/N2/GDrfO4wNLY2N3m5ufo6OipxPHv7+/u7+/V4PDV3/Dj6O9fl/RNjPWPqtzMzNPe3uCErvPb4/BuoPRwovRrnvRpl+nIydHT09bh4eLK2fBzo/NNjPS5v9DQ0NTX19jg4ODr7PDe5fC80PFMjPWQq9zNzdPW1tjZ2dnFys67xMjq7PDf5vDO2/DS3fDK2PBMi/Vpl+fDxMzNztLS09SXpqx4j5ng4eLf4OHh4uLJ2PB0pPR9qfOxyfJLivJbdI5feIhhe4difIlkgIxmgo9lgY9kgY6YqbGBrPPc5PBvoPNonfTa4vBLi/V/m82ssryyub62vsK3vsG4v8NrhJGSpK28xcrM0tSlwvLX4O/X4PCnw/FrmOess761vMLZ2dra2tq5wMRifYrHzM9/qvPH1/Dp6/Dp7PDL2fGGr/NKivRMivOQnbFgeYnDyMvY2Nl3jpeClZ/c3Nzi4uJJivSRqthwhJN3i5mWpa1lfovHy83h4eHj4+NrmOa1ucJje4unsrjb29vd3d1JifRMifGTobNed4hhfIeKnKXf399IifRRd6yQnqq2vcNlf4uKm6Te3t5aitnIydDU1Ne4wMNmf4yIm6Ta2ttHiPRLiPG9wc7Pz9O5wcWtuLxKiPFJiPFJh/FIh/BHhvBGhvCVrNfNzdLIzM5CU7RBUrRBUbRKWrOwtMrQ0tZDVbZDVLZEVrelqcbLzNHT1NZEVbdEVLeVnMPKy9DR0dTV1dbY2NiCi7/KytDPz9LT09XW1tZve7zFxc3MzNDR0dPV1dXCwsvHyMzOztDQ0NHU1NTX19fZLLn2AAAAG3RSTlMAH9WR1PgEOaD7BUPaHNbUHNZ2D+dyD9Xa1yMkcVhlAAACa0lEQVQ4y4XTZXTTUByH4eHuzlZvg3QrDBsZjOCuAwIEGQTdYNiGS3G3BYcihVB0WFu0wBg6nHZYkRYpVqTI0C/8703LDjTn7P36e+5NT04TEpJjuXKHhoVJpFKZTCaX5xEBeUNDJRKpQiGTKVWqfPmDAd4RUCpVanWBYCDx7wIoGAykKOECAIUKiwHF3ws0miJBQIFn2OUIEFWqVquu1YZHQDpd0WIAZLgaNSMja9XWaAiiTt16UVHacAhMcQEolfXJ6AYNyZhGBEE1btI0G0QAUELNyOYt1OqWrTQERbVu07adNgB0AFRQe7ID+oHwAIrq2Klzl9j/QddusMdA3Sma7tGzF9O7j/AEBNRQ335wPC6uPzmAptmBgwYPGTosPj4hYTgGMGlGkIlwPTGSHEWz7OgxY5OSk8eNnzBxki4AJpNTphLUtOlkIsvq9TNmzpo9Z+68+QsWYkCgFpHk4iXR5FK065ctX5HCrVy1Gr0qDChozdp16zdsxLth0+YtW43btvM7dBhQOBpi0W4wGEw7d+3es3cfz6fq9gOg/bHCcdhNBw4eSjps5nlLqh+wOD3eTSaT9cjRY8dPMGbecjIWQPYqHDdZrbZTp8+knU0BkA5A788QmK0227nzFy5eupxhSUeghH/EMzpus125eu268UbaTd6CQMlSt1C3UXa73eFwZGbeuXvPyN3PMGPwb6UfOJ3Oh48eP2E4jhMDZVwul/vps+cvOIYBYAn+k5f1eF6+ev3mLeMFwIuAch73u/cfPvq8ADgxUN796fOXr1kIMBxfQeRbrfjt+4+fv7J8Pt9vb6XKOX/8fwCaQSM72Cx7bQAAAABJRU5ErkJggg==',
+                        enable: true
+                    },
+                    {
+                        name: '有道词典',
+                        url: 'https://youdao.com/w/%s',
+                        icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAABgFBMVEX////99PTpXV3ug4P74uL1uLjfGBjfFhbjMDDuhobpYmLfFRXfFxfiLi785ubiKSniLCzvjIz75OTviYn+9/fjODj86ur1urr86Oj++vroVlbwjo73yMjgGxvkODjqaWn51tbhJCT3wsLwlJTqYGD97+/gHh74ysrxl5fqZmbkOjr51dXyoqL98vLlQUH3xsbzqKj62tr4zs73w8PzpqbsdHTpYGDmSEjlRUX++PjkPT3+9fX74OD63NzwkpLnVFTjMzPiJyfgHBzfGhrteXn1trb//f3//Pz++/v++fn2wMD2urr0r6/zpKTyn5/xm5vvj4/rbGznUlLnTk7mSUnjNTXhJSXnUVHynZ3scnLqZGToWlrkNTXgIiLrbm70srL62Nj63t750tLtfn7xmprhJyffGRnmTEzfFBTfHBz2vLz1tLTtf3/zqqr87Oz/+/vxnJzrcXHgICDtfX375ubugoLpZGT98PDqY2P0rKz4zMz0sLD2vr7hLCzynJzzrKymY9pbAAAAAXRSTlMAQObYZgAACcVJREFUeAHF24dfGlkQB/Cx7YC/Z1BErFjOAxstekQ0oomI2BVbCocaT5Y7W3q/8qdfUS+wb1nYxYR8Pz3Fmd19bz7zilSBmtq6evqeGhS22b9nCo1giCb7HfpO6h1gZnBzi5O+ixbBV8C21nqqPlcb+AaEze6mamsXnAduaumgqursAheCsHXXUxX1eMBa4F4nVU8f66Crhqqmf4Bl8PxA1TMoWOdHqh6vDSyBb4iqZ1iwzghVj3cULIFjjKrHr7COnaonEGQZmtxUCXeIKhBWwBIxSJZ03B2f+Clyb7I5SkamyIgrCJZgOkAldbruB7zuDudMLDxbFxmZe/BwPi7wrzkysmD4TGHBEswn6NpiMrm01Nm53B9aWU2shdc3Nge3Wux1qe2d3eDoXtO+R/A1APwvjJCRHX6UcFMRySjrPPQ/XniSelqbntuZDE7/bGvKeDyKEMp/xHVMXGMtLJCBxV1A6T04PJqpr38WOzoaOw5vDnbbf1mI1CpcFPLYvBPDBKJgMDg+4MhmfB5VyUfhrwfqOBnJQfNc/E386hkjI7Xgbw1i1N9JRh7zNwUI36TfS8aGfsO3Cs3/GnjUPZ6kUjrn8DWD4ssQjvtstQunzikqJxQHV0ozIYVyRZ1vmt5NH2z+cOwkc1pVmAvFEtU34Gh60DsdzW2nf7RvDW9urIfXzk5DAbJow8bgMtPQ52h+0Da629h3EFk4t7cMPl6/mHDe6XBfXnoDAdfyc7qV+q3JffWaLzPgaFZY1jwRm7nj9nbSN9Pffrh2mGhfCY2PzTyO6wrZIVXR0iTLapNURS8U1oLNTVVUvwf5A4Spml6yBCNUTSEfa6HtGRXlcjtnYkf9/WNj/UexmQ4XfRUBXWVW1qS4XvfKRvf5y5Fom605O/Dqlc/3KpNt/jna93p2yF1DtzTMWhALlBdLbNTlerP5hk9ujxxR+9kU3YKzCayByU66sjyeSOWyisIA2BAgRG9kyEUVSsojEJnQVV7hJ9F5BWAzwOpuuMIUEoI1wIdEbzYbs4IZlrqQnSGqgHOUtcTIZaLWIRhsFTJvp8iyCFgDvkejCrgi4Hf3yaLDuEGLU6G592TJ5TT4q0JXgKxIga0ws0DqWybzEibbY4AVRfhso9Hczvbc9k50dF8oRsM0TKb1N8NMbIhscGTLf3Y8tdyZXPxXcml55nC4MSsA1oFthkxaqjURXn3Y9bbB6aUinCfTAqz3mkzaEmVry17f6REZu5wt8g3hcJMpY1lwCeD5R/6yk+pwACyBsmayBIKNAb7UuIvKW/OxDB9uPwPhSx1TeVOBS/cB6+y5qbxBhY0pkyvlNqZ6Lk5aIrlo716WZfAMUVlrcbAh39sAGRs7PWmctHmEIrh4TUK8ncrpsIENoZGMPPsYye17BH4Fl1B+FF7ussRELZvqaUkPCDDAMqvF8H4t2BjiE6TX78/NSx1KxQksHYBLwPwnkgQ+38sKsKzSBF4Lqdhr4eFd0nh/ElUANk98pFLWVHAefmtiSTSgefrNXgGwFeoZlXA2r4nv+/wOrPWB8mrWRwXYGsRXyFjilTb+IeXAWpGCbCcVsFXwjZuOn22gSxtLWumGc0EF2LomJxn56AMXeDBBNORjSYKurUwzTG1iyXbIQNKuLcD3nETUrkKq5Nf5J+sUGEe+3qFTFUWAZXhKxbleCs6DeOkqdkgDxxv6V+ydAOuAhVAejubSqRN/+OLi40X4pBls8qDAe08bx09XNgRrYNRLRMfTLANDyebOh1cCNVPJ/FPtgWWDVExDUPP4c+N0LcWS9BJRqAlFlp+RhhkXSZwZsETpIT2vvWD4Afuti3RtSp6FopVowgH5zY9uhaiY3wVL8CpGOokcfwEoc/35Qid3ZsowhbTxAbUxHKDiBlmGYrNwGsj3jLm1Zfoi4JATaLgrvX+1cYgM/cKmzvlikX3BAAvRfK9hmQr0qKzl8wehGS1dPVRCn9mj7rHN19s7qdmPTtLa0NXRP7iQbcNFJSzvskzUkYEpl8GVIQ0hUPD47+5QSR1NfMuj3gU2hkz3Emktup2xhuGWuvPXr8/ts4+H2n1gWdjalR02BJt25iXv/tSa3suqnCdU1pk/Igvce+DiIKaPqcD4SW5AiPItKZoCZMEzwwWi2J2hL5ZP0z4BNgPB+2TBkQdG8Z30RWLbfFOIuWRF18ZkwXw9dX6w1JO+JivsRuNvLN/E9gJsnnLxFXapMJAf/y/iYAugviArusB6UD7T//4UYGvmR3rItMs9lkjV/KPKVgG+g34yaSwD1sH0e+3lUqvAA6+dZMpEHCyD55BuLKe5MuA2fyeZkFDBOqn8ukQBVwhKrr2yWYiHMbrRuQuuHJQ+UxeYZaKV/neqgCUAiysMcBnwUDnJnD5C7xTdWDxnGdS9SPfJi5PZtyNtmbL1caB8AntgifDnV8by30JEVzrohjt2GnmAWybQ7yvVUYZUOX5rgDTOb/sG/hIsqzPsuKEMklay9rYJDAtdE3aXvnhd7jzZ3XbbT3DOstSi0ZE2MmMkiWVvmYBLNwnEoXHL/3SRJGPz5hMw1xCiN2CYgDgh2alyyzHgfAXWEFtU4ED7d2skq8MtEzgVrDU/YbxkEAlT3QysJNDKWogmjf9a/GWim0HTAwHzCRywFp5QofUyY6AzyDp1b87jphMIROVCr33Ld7XLrl9Iclxkc+SEKDSnwFwCR9IPwMMZ+Y5vyWX/SlyfQJiIkn4bQ0rA3J262mSpcz21h7QO9Qmop9fT63XGTAJbkD8gaQ1pvsGvaXkMC5Y5LunacUoxTMB4EF+QJA3NEFknjQ9gCYKF21KKh0oK/MwayNSTZELVZOA4pgLLRbqZOcq7v7FLJbUrZTeXno+wRtQp/TqUBCntI1JJm4K1XpJO/x/QVqoQfRHLsM4mmbckDwHlRfkbBsg8dtGNQ8ESqL+Tec4sWF/sdeyK1BY9+rRIV17oE4j3kHl+1oLtkorojEgZcPxi5b7BLNw/IvNGBGsgTUUtR3QHCvHgyUSAUoJl0wEyraMZRktySXLdB9aCUKefNoNltWTeX4r8BTrIyOko61JgsA5eknm6w7pWMuZNKWAT7GRaLCsXUTeVsjItwGWtkWnrgjU8p1Sad7jsCSbUGJnVGYV2UM1SWd7NYOnlKLL1ZNahwgVg8uMFVj7sK2AjaHOTSZ07XGh+lsy66087DC9xbS+TSQ2FtUXkJsiK2MXr0Xixc3/xmkxy7SB/FNg26yWrAp+GF3YdnqscAEjLmvLWcU2otnsJN1Vm6tnxxkJjzvZKVW/u07CfTPrQtrc3Gn008ri9g27LPb6SuFh/3deYnks/o6L+AbDOAQEKjE3tAAAAAElFTkSuQmCC',
                         enable: true
                     },
                     {
@@ -1106,6 +1123,40 @@
             background-color: rgba(0,0,0,0.7) !important;
             z-index: 50000 !important;
         }
+
+        /* 搜索建议浮层 */
+        .qs-suggestions-layer {
+            all: initial !important;
+            position: fixed !important;
+            display: block !important;
+            overflow: hidden !important;
+            height: fit-content !important;
+            border: 1px solid #F5F5F5 !important;
+            z-index: 30001 !important;
+        }
+        .qs-suggestion-item, .qs-suggestion-item-selected {
+            all: initial !important;
+            display: block !important;
+            text-align: left !important;
+            vertical-align: middle !important;
+            width: 100% !important;
+            height: 33px !important;
+            line-height: 33px !important;
+            padding-left: 13px !important;
+            font-size: 15px !important;
+            font-family: arial,sans-serif !important;
+            font-weight: 400 !important;
+            color: #555 !important;
+            border: 0px !important;
+            background-color: rgba(255,255,255,0.9) !important;
+        }
+        .qs-suggestion-item-selected {
+            background-color: rgba(230,230,230,0.9) !important;
+        }
+        .qs-suggestion-item:hover {
+            cursor: pointer !important;
+            background-color: rgba(230,230,230,0.9) !important;
+        }
     `;
 
     ///////////////////////////////////////////////////////////////////
@@ -1114,17 +1165,31 @@
     
     var conf = GM_getValue('qs-conf', defaultConf);
 
-    var hotkeyEngineMapping = {};           // 自定义快捷键搜索的hotkey到engine的映射表
+    var hotkey2Engine = {};             // 自定义快捷键搜索的hotkey到engine的映射表
 
-    var quickSearchPageLock = false;        // 是否在当前页面锁定快搜所有功能, 锁定之后仅响应解锁快捷键
+    var qsPageLock = false;             // 是否在当前页面锁定快搜所有功能, 锁定之后仅响应解锁快捷键
 
-    var quickSearchToolbar = null;          // 快搜划词工具条
-    var quickSearchBackgroundLayer = null;  // 快搜主窗口背景层
-    var quickSearchMainBox = null;          // 快搜主窗口
-    var quickSearchSettingBox = null;       // 快搜设置窗口
-    var quickSearchInfoTipsLayer = null;    // 快搜信息提示浮层
-    var quickSearchSearchInput = null;      // 快搜主窗口搜索框
-    var quickSearchConfigTextarea = null;   // 快搜设置窗口配置框
+    var qsToolbar = null;               // 快搜划词工具条
+    var qsBackgroundLayer = null;       // 快搜主窗口背景层
+    var qsMainBox = null;               // 快搜主窗口
+    var qsSearchInput = null;           // 快搜主窗口搜索框
+    var qsSettingBox = null;            // 快搜设置窗口
+    var qsConfigTextarea = null;        // 快搜设置窗口配置框
+    var qsInfoTipsLayer = null;         // 快搜信息提示浮层
+    var qsSuggestionsLayer = null;      // 快搜搜索建议浮层
+    var qsSuggestionItems = [];         // 快搜搜索建议所有item元素(不一定都显示)
+
+    ///////////////////////////////////////////////////////////////////
+    // 版本升级更新配置
+    ///////////////////////////////////////////////////////////////////
+
+    //
+    // for 1.1 -> 1.2
+    //
+    if (!conf.engineSuggestions) {
+        conf.engineSuggestions = defaultConf.engineSuggestions;
+        GM_setValue('qs-conf', conf);
+    }
 
     ///////////////////////////////////////////////////////////////////
     // 功能函数
@@ -1268,7 +1333,7 @@
         // 尝试获取文本(纯数字除外)在url中完整出现的input/textarea的值
         var eles = document.querySelectorAll('input, textarea');
         for (var ele of eles) {
-            if (isVisualOnPage(ele) && !quickSearchMainBox.contains(ele) && !quickSearchSettingBox.contains(ele)) {
+            if (isVisualOnPage(ele) && !qsMainBox.contains(ele) && !qsSettingBox.contains(ele)) {
                 var eleValue = ele.value.trim();
                 if (eleValue && !/^\d+$/.test(eleValue)) {
                     var encodedEleValue = encodeURIComponent(eleValue);
@@ -1293,14 +1358,14 @@
     // 判断是否允许工具条
     function isAllowToolbar(event) {
         var target = event.target;
-        if (!conf.showToolbar || quickSearchPageLock) {
+        if (!conf.showToolbar || qsPageLock) {
             return false;
         }
         if (!conf.enableOnInput && (target.tagName == 'INPUT' || target.tagName == 'TEXTAREA')) {
             return false;
         }
-        if (quickSearchMainBox && quickSearchMainBox.contains(target)
-        || quickSearchSettingBox && quickSearchSettingBox.contains(target)) {
+        if (qsMainBox && qsMainBox.contains(target)
+        || qsSettingBox && qsSettingBox.contains(target)) {
             return false;
         }
         return true;
@@ -1316,10 +1381,10 @@
         if (event.shiftKey) {
             return false;
         }
-        if (quickSearchPageLock && event.code != 'KeyL') {
+        if (qsPageLock && event.code != 'KeyL') {
             return false;
         }
-        if (!quickSearchPageLock && event.code == 'Escape') {
+        if (!qsPageLock && event.code == 'Escape') {
             return true;
         }
         if (target.tagName == 'INPUT' || target.tagName == 'TEXTAREA') {
@@ -1329,7 +1394,7 @@
                 return false;
             }
         }
-        if (quickSearchSettingBox && quickSearchSettingBox.contains(target)) {
+        if (qsSettingBox && qsSettingBox.contains(target)) {
             return false;
         }
         return true;
@@ -1351,7 +1416,7 @@
         var url, source;
 
         if (isMainBoxVisual()) {
-            url = quickSearchSearchInput.value.trim();
+            url = qsSearchInput.value.trim();
             source = 'mainbox';
         } else {
             url = getSelection();
@@ -1386,7 +1451,7 @@
         var query, source;
 
         if (isMainBoxVisual()) {
-            query = quickSearchSearchInput.value.trim();
+            query = qsSearchInput.value.trim();
             source = 'mainbox';
         } else {
             query = getSelection();
@@ -1454,14 +1519,14 @@
 
     // 点击快搜主窗口搜索引擎.
     function openEngineOnClickMainBox(engine, event) {
-        var query = quickSearchSearchInput.value.trim();
+        var query = qsSearchInput.value.trim();
         openEngineOnClick(engine, query, event);
     }
 
     // 切换快搜page lock状态
     function toggleQuickSearchPageLock() {
-        quickSearchPageLock = quickSearchPageLock ? false : true;
-        if (quickSearchPageLock) {
+        qsPageLock = qsPageLock ? false : true;
+        if (qsPageLock) {
             hideToolbar();
             hideMainBox();
             showInfoTipsLayer('已禁用(🔒)');
@@ -1488,10 +1553,14 @@
         conf.hotkeyEngines.forEach(engine => {
             if (!engine.enable) return; // 此处return搭配forEach, 请勿改为其他形式循环
             engine.hotkeys.forEach(key => {
-                hotkeyEngineMapping[key] = engine;
+                hotkey2Engine[key] = engine;
             });
         });
     }
+
+    //
+    // 划词工具条
+    //
 
     // 创建划词工具条
     function createToolbar() {
@@ -1536,12 +1605,12 @@
         }, false);
         toolbar.appendChild(icon);
 
-        quickSearchToolbar = toolbar;
+        qsToolbar = toolbar;
     }
 
     // 划词工具条是否处于显示状态
     function isToolbarVisual() {
-        return quickSearchToolbar && quickSearchToolbar.style.display == 'block';
+        return qsToolbar && qsToolbar.style.display == 'block';
     }
 
     // 显示划词工具条
@@ -1549,11 +1618,11 @@
 
         ensureQuickSearchAlive();
 
-        if (!quickSearchToolbar || isToolbarVisual()) {
+        if (!qsToolbar || isToolbarVisual()) {
             return;
         }
 
-        var toolbar = quickSearchToolbar;
+        var toolbar = qsToolbar;
 
         toolbar.style.setProperty('top', '-10000px', 'important');
         toolbar.style.setProperty('left', '-10000px', 'important');
@@ -1581,10 +1650,14 @@
 
     // 隐藏划词工具条
     function hideToolbar() {
-        if (quickSearchToolbar) {
-            quickSearchToolbar.style.setProperty('display', 'none', 'important');
+        if (qsToolbar) {
+            qsToolbar.style.setProperty('display', 'none', 'important');
         }
     }
+
+    //
+    // 快搜主窗口
+    //
 
     // 创建快搜主窗口
     function createMainBox() {
@@ -1720,14 +1793,14 @@
         };
         helpInfoBox.appendChild(settingLink);
 
-        quickSearchBackgroundLayer = backgroundLayer;
-        quickSearchMainBox = mainBox;
-        quickSearchSearchInput = searchInput;
+        qsBackgroundLayer = backgroundLayer;
+        qsMainBox = mainBox;
+        qsSearchInput = searchInput;
     }
 
     // 快搜主窗口是否处于显示状态
     function isMainBoxVisual() {
-        return quickSearchMainBox.style.display == 'block';
+        return qsMainBox.style.display == 'block';
     }
 
     // 显示快搜主窗口.
@@ -1748,18 +1821,18 @@
             query = getSelection();
         }
         if (!query) {
-            query = quickSearchSearchInput.value.trim();
+            query = qsSearchInput.value.trim();
         }
         if (!query) {
             query = getUrlQuery();
         }
-        quickSearchSearchInput.value = query;
+        qsSearchInput.value = query;
 
-        quickSearchBackgroundLayer.style.setProperty('display', 'block', 'important');
-        quickSearchMainBox.style.setProperty('display', 'block', 'important');
+        qsBackgroundLayer.style.setProperty('display', 'block', 'important');
+        qsMainBox.style.setProperty('display', 'block', 'important');
 
         // 选中搜索框文本
-        quickSearchSearchInput.select();
+        qsSearchInput.select();
 
         // 隐藏划词工具条
         if (isToolbarVisual()) {
@@ -1769,9 +1842,14 @@
 
     // 隐藏快搜主窗口
     function hideMainBox() {
-        quickSearchBackgroundLayer.style.setProperty('display', 'none', 'important');
-        quickSearchMainBox.style.setProperty('display', 'none', 'important');
+        destroySuggestions();
+        qsBackgroundLayer.style.setProperty('display', 'none', 'important');
+        qsMainBox.style.setProperty('display', 'none', 'important');
     }
+
+    //
+    // 设置窗口
+    //
 
     // 创建设置窗口
     function createSettingBox() {
@@ -1826,13 +1904,13 @@
         }
         buttonBar.appendChild(saveButton);
 
-        quickSearchSettingBox = settingBox;
-        quickSearchConfigTextarea = configTextarea;
+        qsSettingBox = settingBox;
+        qsConfigTextarea = configTextarea;
     }
 
     // 设置窗口是否处于显示状态
     function isSettingBoxVisual() {
-        return quickSearchSettingBox.style.display == 'block';
+        return qsSettingBox.style.display == 'block';
     }
 
     // 显示设置窗口
@@ -1845,14 +1923,18 @@
         }
 
         var confStr = JSON.stringify(conf, null, 4);
-        quickSearchConfigTextarea.value = confStr;
-        quickSearchSettingBox.style.setProperty('display', 'block', 'important');
+        qsConfigTextarea.value = confStr;
+        qsSettingBox.style.setProperty('display', 'block', 'important');
     }
 
     // 隐藏设置窗口
     function hideSettingBox() {
-        quickSearchSettingBox.style.setProperty('display', 'none', 'important');
+        qsSettingBox.style.setProperty('display', 'none', 'important');
     }
+
+    //
+    // 信息提示浮层
+    //
 
     // 创建信息提示浮层
     function createInfoTipsLayer() {
@@ -1862,21 +1944,272 @@
         infoTipsLayer.style.setProperty('display', 'none', 'important');
         document.body.appendChild(infoTipsLayer);
 
-        quickSearchInfoTipsLayer = infoTipsLayer;
+        qsInfoTipsLayer = infoTipsLayer;
     }
 
     // 显示信息提示浮层
     var idOfSettimeout = null;
     function showInfoTipsLayer(info) {
-        quickSearchInfoTipsLayer.textContent = 'Quick Search: ' + info;
-        quickSearchInfoTipsLayer.style.setProperty('display', 'block', 'important');
+        qsInfoTipsLayer.textContent = 'Quick Search: ' + info;
+        qsInfoTipsLayer.style.setProperty('display', 'block', 'important');
         if (idOfSettimeout) {
             clearTimeout(idOfSettimeout);
         }
         idOfSettimeout = setTimeout(function () {
-            quickSearchInfoTipsLayer.style.setProperty('display', 'none', 'important');
+            qsInfoTipsLayer.style.setProperty('display', 'none', 'important');
         }, 2000);
     }
+
+    //
+    // 搜索建议
+    //
+
+    var rawInputQuery = null;           // 输入框中的原始查询
+    var multiEngineSuggestions = [];    // 多个搜索引擎的建议, 每个一个子数组
+    var suggestionCount = 0;            // 多个搜索引擎的实际建议的总数
+    var selectedSuggestionIndex = -1;   // 用户选中的搜索建议项对应的index
+
+    // 搜索建议最大条数, 用于事先创建好相应元素
+    function getMaxSuggestionCount() {
+        var count = 0;
+        conf.engineSuggestions.forEach(es => {
+            if (!es.enable) return;
+            count += es.showCount;
+        });
+        return count;
+    }
+
+    // 创建搜索建议浮层
+    function createSuggestionsLayer() {
+
+        var maxSuggestionCount = getMaxSuggestionCount();
+        if (maxSuggestionCount == 0) {
+            return;
+        }
+
+        // 搜索建议浮层
+        var suggestionsLayer = document.createElement('div');
+        suggestionsLayer.id = 'qs-suggestions-layer';
+        suggestionsLayer.className = 'qs-suggestions-layer';
+        suggestionsLayer.style.setProperty('display', 'none', 'important');
+        document.body.appendChild(suggestionsLayer);
+
+        // 搜索建议条目
+        for (var i=0; i<maxSuggestionCount; i++) {
+            var suggestionItem = document.createElement('div');
+            suggestionItem.id = 'qs-suggestion-item-' + i;
+            suggestionItem.className = 'qs-suggestion-item';
+            suggestionItem.addEventListener('click', function (e) {
+                qsSearchInput.value = this.textContent;
+                openEngineOnClickMainBox(conf.defaultEngine, e);
+            }, true);
+            suggestionsLayer.appendChild(suggestionItem);
+
+            qsSuggestionItems.push(suggestionItem);
+        }
+
+        // 向搜索框添加响应函数
+        qsSearchInput.addEventListener('input', function (e) {
+            var query = qsSearchInput.value.trim();
+            if (query) {
+                triggerSuggestions(query);
+            } else {
+                destroySuggestions();
+            }
+        }, true);
+        qsSearchInput.addEventListener('mousedown', function (e) {
+            var query = qsSearchInput.value.trim();
+            if (query) {
+                triggerSuggestions(query);
+            }
+        }, true);
+        qsSearchInput.addEventListener('keydown', function (e) {
+            if (e.code == 'ArrowDown' && isSuggestionsLayerVisual()) {
+                e.preventDefault();
+                selectSuggestionItem(selectedSuggestionIndex + 1);
+                return;
+            }
+            if (e.code == 'ArrowUp' && isSuggestionsLayerVisual()) {
+                e.preventDefault();
+                selectSuggestionItem(selectedSuggestionIndex - 1);
+                return;
+            }
+            if (e.code == 'Tab' && isSuggestionsLayerVisual()) {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    selectSuggestionItem(selectedSuggestionIndex - 1);
+                } else {
+                    selectSuggestionItem(selectedSuggestionIndex + 1);
+                }
+                return;
+            }
+        }, true);
+
+        qsSuggestionsLayer = suggestionsLayer;
+    }
+
+    // 判断搜索建议浮层是否显示
+    function isSuggestionsLayerVisual() {
+        return qsSuggestionsLayer && qsSuggestionsLayer.style.display == 'block';
+    }
+
+    // 显示搜索建议浮层
+    function _showSuggestionsLayer() {
+        if (!qsSuggestionsLayer || isSuggestionsLayerVisual()) {
+            return;
+        }
+
+        var inputPos = qsSearchInput.getBoundingClientRect();
+        var top = inputPos.bottom + 'px';
+        var left = inputPos.left + 'px';
+        var width = (inputPos.right - inputPos.left) + 'px';
+        qsSuggestionsLayer.style.setProperty('top', top, 'important');
+        qsSuggestionsLayer.style.setProperty('left', left, 'important');
+        qsSuggestionsLayer.style.setProperty('width', width, 'important');
+
+        qsSuggestionsLayer.style.setProperty('display', 'block', 'important');
+    }
+
+    // 隐藏搜索建议浮层
+    function _hideSuggestionsLayer() {
+        if (qsSuggestionsLayer) {
+            qsSuggestionsLayer.style.setProperty('display', 'none', 'important');
+        }
+    }
+
+    //
+    // 请求百度搜索建议
+    //
+    const baiduSuggestionUrl = {
+        'http:': 'http://suggestion.baidu.com/su?wd=%s&cb=callback',
+        'https:': 'https://suggestion.baidu.com/su?wd=%s&cb=callback',
+    }[window.location.protocol];
+
+    // 油猴脚本的GM_xmlhttpRequest可以直接跨域请求, 不受同源策略限制, 这样就不用通过jQuery来发送jsonp请求了.
+    function requestBaiduSuggestions(query, index, count) {
+
+        function callback(res) {
+            multiEngineSuggestions[index] = res.s.slice(0, count);
+            loadSuggestions();
+        }
+
+        var url = baiduSuggestionUrl.replace('%s', encodeURIComponent(query));
+        GM_xmlhttpRequest({
+            method: 'GET',
+            url: url,
+            timeout: 3000,
+            onload: response => {
+                if (response.status == 200) {
+                    eval(response.responseText);
+                } else {
+                    console.log(`Quick Search: Baidu Suggestions: code ${response.status}`);
+                }
+            }
+        });
+    }
+
+    //
+    // 请求Google搜索建议
+    //
+    const googleSuggestionUrl = {
+        'http:': 'http://suggestqueries.google.com/complete/search?client=firefox&q=%s&jsonp=callback',
+        'https:': 'https://suggestqueries.google.com/complete/search?client=firefox&q=%s&jsonp=callback',
+    }[window.location.protocol];
+    
+    function requestGoogleSuggestions(query, index, count) {
+        
+        function callback(res) {
+            multiEngineSuggestions[index] = res[1].slice(0, count);
+            loadSuggestions();
+        }
+
+        var url = googleSuggestionUrl.replace('%s', encodeURIComponent(query));
+        GM_xmlhttpRequest({
+            method: 'GET',
+            url: url,
+            timeout: 3000,
+            onload: response => {
+                if (response.status == 200) {
+                    eval(response.responseText);
+                } else {
+                    console.log(`Quick Search: Google Suggestions: code ${response.status}`);
+                }
+            }
+        });
+    }
+
+    var suggestionHandlers = {
+        'baidu': requestBaiduSuggestions,
+        'google': requestGoogleSuggestions,
+    }
+
+    // 选中搜索建议项
+    function selectSuggestionItem(newSelectedIndex) {
+        if (qsSuggestionItems[selectedSuggestionIndex]) {
+            qsSuggestionItems[selectedSuggestionIndex].className = 'qs-suggestion-item';
+        }
+        selectedSuggestionIndex = newSelectedIndex;
+        selectedSuggestionIndex = selectedSuggestionIndex < -1 ? suggestionCount - 1 : selectedSuggestionIndex;
+        selectedSuggestionIndex = selectedSuggestionIndex >= suggestionCount ? -1 : selectedSuggestionIndex;
+        if (selectedSuggestionIndex == -1) {
+            qsSearchInput.value = rawInputQuery;
+        } else {
+            qsSearchInput.value = qsSuggestionItems[selectedSuggestionIndex].textContent;
+            qsSuggestionItems[selectedSuggestionIndex].className = 'qs-suggestion-item-selected';
+        }
+    }
+
+    // 触发搜索建议
+    function triggerSuggestions(query) {
+        rawInputQuery = query;
+        if (selectedSuggestionIndex != -1) {
+            selectSuggestionItem(-1);
+        }
+        
+        var index = 0;
+        conf.engineSuggestions.forEach(es => {
+            if (!es.enable) return;
+            suggestionHandlers[es.name](query, index, es.showCount);
+            index++;
+        })
+    }
+
+    // 装载搜索建议
+    function loadSuggestions() {
+        // 由于装载是异步延迟的, 若用户已经删光了输入框内容, 则不显示搜索建议
+        if (!qsSearchInput.value.trim()) {
+            destroySuggestions();
+            return;
+        }
+
+        var items = qsSuggestionItems;
+        var allSuggestions = multiEngineSuggestions.flat(1);
+        suggestionCount = allSuggestions.length;
+        
+        allSuggestions.forEach((suggestion, i) => {
+            items[i].textContent = suggestion;
+            items[i].style.setProperty('display', 'block', 'important');
+        });
+        for (var i=allSuggestions.length; i<items.length; i++) {
+            items[i].style.setProperty('display', 'none', 'important');
+        }
+        if (!isSuggestionsLayerVisual()) {
+            _showSuggestionsLayer();
+        }
+    }
+
+    // 销毁搜索建议
+    function destroySuggestions() {
+        _hideSuggestionsLayer();
+        rawInputQuery = null;
+        multiEngineSuggestions = [];
+        suggestionCount = 0;
+        selectedSuggestionIndex = -1;
+    }
+
+    //
+    // 创建以上所有东东
+    //
 
     function initQuickSearch() {
         loadSheet();
@@ -1887,6 +2220,7 @@
         createMainBox();
         createSettingBox();
         createInfoTipsLayer();
+        createSuggestionsLayer();
     }
 
     // 百度等网页会在不刷新页面的情况下改变网页内容, 导致quick search除了js脚本之外的东东全部没了.
@@ -1914,7 +2248,7 @@
     window.addEventListener('mousedown', function (e) {
         var target = e.target;
         // 隐藏工具条
-        if (isToolbarVisual() && !quickSearchToolbar.contains(target)) {
+        if (isToolbarVisual() && !qsToolbar.contains(target)) {
             hideToolbar();
         }
     }, true);
@@ -1935,7 +2269,7 @@
         // 划词时自动复制文本到剪贴板
         if (conf.autoCopyToClipboard
         && target.tagName != 'INPUT' && target.tagName != 'TEXTAREA'
-        && !quickSearchMainBox.contains(target) && !quickSearchSettingBox.contains(target)) {
+        && !qsMainBox.contains(target) && !qsSettingBox.contains(target)) {
             var selection = getSelection();
             if (selection) {
                 GM_setClipboard(selection, 'text/plain');
@@ -2002,9 +2336,9 @@
         }
 
         // (Alt+)自定义快捷键搜索. 文本优先级: 搜索框已有文本(若快搜主窗口可见) > 网页中选中文本 > 当前页面搜索词
-        if (hotkeyEngineMapping[e.code]) {
+        if (hotkey2Engine[e.code]) {
             e.preventDefault();
-            var engine = hotkeyEngineMapping[e.code];
+            var engine = hotkey2Engine[e.code];
             var query = getQuery();
             openEngineOnKey(engine, query.query, e);
             return;
@@ -2019,8 +2353,18 @@
         window.addEventListener('mousedown', function (e) {
             var target = e.target;
             // 隐藏快搜主窗口
-            if (isMainBoxVisual() && !isSettingBoxVisual() && !quickSearchMainBox.contains(target)) {
+            if (isMainBoxVisual() 
+            && !isSettingBoxVisual() 
+            && !qsMainBox.contains(target)
+            && !qsSuggestionsLayer.contains(target)) {
                 hideMainBox();
+            }
+
+            // 隐藏搜索建议浮层
+            if (isSuggestionsLayerVisual() 
+            && !qsSuggestionsLayer.contains(target)
+            && !qsSearchInput.contains(target)) {
+                destroySuggestions();
             }
         }, true);
 
@@ -2065,8 +2409,12 @@
 
             if (e.data.keydown) {
                 if (e.data.keydown == 'KeyF') {
-                    if (!quickSearchPageLock) {
-                        showMainBox(e.data.query);
+                    if (!qsPageLock) {
+                        if (!isMainBoxVisual()) {
+                            showMainBox(e.data.query);
+                        } else {
+                            hideMainBox();
+                        }
                     }
                 }
                 if (e.data.keydown == 'KeyL') {
