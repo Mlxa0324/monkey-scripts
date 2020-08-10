@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name        知乎下一条回答左手快捷键
+// @name        知乎快捷键调优
 // @namespace   Violentmonkey Scripts
-// @version     1.3
+// @version     1.4
 // @author      smallx
-// @description 知乎下一条回答左手快捷键 | 知乎Tab下一条回答
+// @description 知乎快捷键调优, 方便左手配合鼠标操作 | 无需选中回答, Tab下一条, C展开评论
 // @homepageURL https://github.com/smallx/monkey-scripts/tree/master/zhihu-next-answer
 // @updateURL   https://github.com/smallx/monkey-scripts/raw/master/zhihu-next-answer/zhihu-next-answer.user.js
 // @match       *://www.zhihu.com/*
@@ -16,6 +16,8 @@
 // - Shift + Tab: 上一条回答
 // - 空格: 向下滚动一屏幕 减去 知乎导航条高度 减去 收起评论按钮栏高度
 // - Shift + 空格: 向上滚动一屏幕 减去 知乎导航条高度 减去 收起评论按钮栏高度
+// - C 或 `: 展开/收起评论
+// - 点击评论弹窗的外面: 收起评论
 (function () {
     'use strict';
 
@@ -63,6 +65,7 @@
     }
 
     // 针对不同页面获取回答所对应的元素列表
+    // 由于知乎是动态加载的, 所以该方法需要在每次action时调用.
     function getAnswerItems() {
         var url = window.location.href;
         if (/^(http|https):\/\/www.zhihu.com(\/|\/follow)?$/.test(url)) {                       // 首页 推荐/关注
@@ -78,8 +81,8 @@
 
     var currentIndex = -1;  // 当前滚动到了哪个回答
 
-    window.onkeydown = function(event) {
-
+    window.addEventListener('keydown', function (event) {
+        
         var target = event.target;
         if (target.tagName == 'INPUT'
         || target.tagName == 'TEXTAREA'
@@ -87,8 +90,8 @@
             return;
         }
         
-        if (event.keyCode == 9) {   // Tab键
-
+        // 下一条/上一条回答
+        if (event.code == 'Tab') {
             event.preventDefault();
 
             var items = getAnswerItems();
@@ -97,7 +100,7 @@
             }
             var visualIndexes = getVisualElementIndexes(items);
             var nextIndex = -1;
-            if (currentIndex != -1 && visualIndexes.includes(currentIndex)) {
+            if (visualIndexes.includes(currentIndex)) {
                 nextIndex = event.shiftKey ? currentIndex-1 : currentIndex+1;
             } else if (visualIndexes.length > 0) {
                 nextIndex = event.shiftKey ? visualIndexes[visualIndexes.length-1]-1 : visualIndexes[0]+1;
@@ -112,19 +115,59 @@
             } else {
                 window.scrollTo({top: nextItemPos.top - 52, behavior: 'smooth'});
             }
+            items[nextIndex].focus({preventScroll:true});
+            items[nextIndex].style.boxShadow = '0px 0px 6px #BBB';
             if (currentIndex != -1) {
                 items[currentIndex].style.boxShadow = 'none';
             }
-            items[nextIndex].style.boxShadow = '0px 0px 6px #BBB';
             currentIndex = nextIndex;
 
-        } else if (event.keyCode == 32) {   // 空格
+            return;
+        }
+
+        // 展开/收起评论
+        if (event.code == 'KeyC' || event.code == 'Backquote') {
             event.preventDefault();
+
+            var items = getAnswerItems();
+            if (!items || items.length == 0) {
+                return;
+            }
+            var visualIndexes = getVisualElementIndexes(items);
+            var index = visualIndexes.includes(currentIndex) ? currentIndex 
+                : (visualIndexes.length>0 ? visualIndexes[0] : -1);
+            if (index != -1) {
+                var buttons = items[index].querySelectorAll('button.ContentItem-action');
+                buttons.forEach(button => {
+                    var text = button.innerText;
+                    if (text.includes('条评论') || text.includes('收起评论')) {
+                        button.click();
+                    }
+                });
+            }
+
+            return;
+        }
+        
+        if (event.code == 'Space') {
+            event.preventDefault();
+
             if (event.shiftKey) {
                 window.scrollTo(0, window.scrollY - (window.innerHeight - 52 - 54 - 3));
             } else {
                 window.scrollTo(0, window.scrollY + (window.innerHeight - 52 - 54 - 3));
             }
+
+            return;
         }
-    };
+    }, true);
+
+    window.addEventListener('click', function (event) {
+        var target = event.target;
+        // 点击评论弹窗外面收起评论
+        var modalInner = document.querySelector('.Modal-inner');
+        if (modalInner && !modalInner.contains(target)) {
+            document.querySelector('.Modal-closeButton').click();
+        }
+    }, true);
 })();
