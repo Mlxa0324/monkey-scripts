@@ -170,7 +170,7 @@
                     iframe.scrolling = 'no';
                     buttonFlag = 1 - buttonFlag;
                 }
-            }, false);
+            }, true);
             div.appendChild(maxButton);
         }
 
@@ -278,6 +278,6 @@
     }
 
     loadSheet();
-    window.addEventListener('DOMContentLoaded', multiSearch, false);
+    window.addEventListener('DOMContentLoaded', multiSearch, true);
 
 })();
