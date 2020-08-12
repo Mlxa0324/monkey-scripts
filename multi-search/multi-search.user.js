@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Multi Search - 多搜索引擎搜索
 // @namespace   Violentmonkey Scripts
-// @version     1.2
+// @version     1.3
 // @author      smallx
 // @description 一个可以同时搜索多个搜索引擎并将结果并排显示的油猴脚本 | 谷歌百度同时搜索并排显示
 // @homepageURL https://github.com/smallx/multi-search
@@ -174,9 +174,6 @@
             div.appendChild(maxButton);
         }
 
-        // 避免在iframe中嵌套调用
-        if (window.self != window.top) return;
-
         // 谷歌 + 百度
         function googlePageMultiSearch() {
             var docWidth = document.body.scrollWidth;
@@ -277,7 +274,14 @@
         }
     }
 
+    // 避免在iframe中嵌套调用
+    if (window.self != window.top) return;
+
     loadSheet();
-    window.addEventListener('DOMContentLoaded', multiSearch, true);
+    if (document.readyState == 'interactive' || document.readyState == 'complete' || document.readyState == 'loaded') {
+        multiSearch();
+    } else {
+        window.addEventListener('DOMContentLoaded', multiSearch, true);
+    }
 
 })();
