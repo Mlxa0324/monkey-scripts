@@ -1312,7 +1312,7 @@
                 var query = params.get(queryKey);
                 if (query) {
                     console.log(`Quick Search: get query by URL-KV, engine is ${engine.url}`);
-                    return decodeURIComponent(query);
+                    return query;   // URLSearchParams已经decode过了
                 }
             } else {    // engine.url中没有问号(?)
                 var parts = removeUrlDomain(engine.url).split('%s');
