@@ -80,7 +80,7 @@
         `;
         var css = document.createElement('style');
         css.type = 'text/css';
-        css.id = 'search-engine-css';
+        css.id = 'multi-search-css';
         css.textContent = sheet;
         document.getElementsByTagName('head')[0].appendChild(css);
     }
@@ -96,7 +96,7 @@
         }
 
         function getQuery(inputPath) {
-            var query = document.evaluate(inputPath, document, null, 9, null).singleNodeValue.value;
+            var query = document.evaluate(inputPath, document, null, 9, null).singleNodeValue.value.trim();
             return encodeURIComponent(query);
         }
 
@@ -188,23 +188,6 @@
             
             // StackOverflow(谷歌)
             // doOneSearch('stackoverflow_google', 'https://www.google.com/search?q=%s+site%3Astackoverflow.com&num=10&igu=1&newwindow=1', query, 138, docWidth, 710, docHeight - 220, -138, -150);
-
-            //
-            // 下面的只调整了坐标, 以适配同时安装"searchEngineJump 搜索引擎快捷跳转"的情况
-            //
-
-            // 百度
-            // 一次搜索10条
-            // doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=10', query, 165, docWidth - 585, 583, docHeight - 235, -107, -120);
-            // 一次搜索20条
-            // doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=20', query, 165, docWidth - 585, 583, docHeight * 2 - 500, -107, -120);
-            
-            // StackOverflow(谷歌)
-            // doOneSearch('stackoverflow_google', 'https://www.google.com/search?q=%s+site%3Astackoverflow.com&num=10&igu=1&newwindow=1', query, 165, docWidth, 710, docHeight - 220, -138, -150);
-            
-            ////////////////////////////////////////
-            // 如果想要多添加几个搜索引擎, 放在这, 下同 //
-            // /////////////////////////////////////
         }
         if (isUrlMatched(/^https?:\/\/www\.google(?:\.[A-z]{2,3}){1,2}\/[^?]+\?(?!tbm=)(?:&?q=|(?:[^#](?!&tbm=))+?&q=)(?:.(?!&tbm=))*$/)) {
             googlePageMultiSearch();
@@ -236,17 +219,7 @@
             // 一次搜索10条
             doOneSearch('google', 'https://www.google.com/search?q=%s&num=10&igu=1&newwindow=1', query, 112, docWidth - 711, 710, docHeight - 220, -138, -150);
             // 一次搜索20条
-            // doOneSearch('google', 'https://www.google.com/search?q=%s&num=20&igu=1&newwindow=1', query, 112, docWidth - 711, 710, docHeight * 2 - 200, -138, -150);
-            
-            //
-            // 下面的只调整了坐标, 以适配同时安装"searchEngineJump 搜索引擎快捷跳转"的情况
-            //
-
-            // 谷歌
-            // 一次搜索10条
-            // doOneSearch('google', 'https://www.google.com/search?q=%s&num=10&igu=1&newwindow=1', query, 140, docWidth - 711, 710, docHeight - 220, -138, -150);
-            // 一次搜索20条
-            // doOneSearch('google', 'https://www.google.com/search?q=%s&num=20&igu=1&newwindow=1', query, 140, docWidth - 711, 710, docHeight * 2 - 200, -138, -150);
+            // doOneSearch('google', 'https://www.google.com/search?q=%s&num=20&igu=1&newwindow=1', query, 112, docWidth - 711, 710, docHeight * 2 - 200, -138, -150);            
         }
         if (isUrlMatched(/^https?:\/\/www\.baidu\.com\//)) {    // 极速搜索状态, url甚至可能是百度主页
             baiduPageMultiSearch();
@@ -260,14 +233,7 @@
             var query = getQuery('//input[@id="sb_form_q"]');
             
             // 百度
-            doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=10', query, 167, docWidth - 650, 590, docHeight - 250, -107, -120);
-            
-            //
-            // 下面的只调整了坐标, 以适配同时安装"searchEngineJump 搜索引擎快捷跳转"的情况
-            //
-
-            // 百度
-            // doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=10', query, 188, docWidth - 650, 590, docHeight - 250, -107, -120);
+            doOneSearch('baidu', 'https://www.baidu.com/s?wd=%s&rn=10', query, 167, docWidth - 650, 590, docHeight - 250, -107, -120);            
         }
         if (isUrlMatched(/^https?:\/\/[^.]*\.bing\.com\/search/)) {
             bingPageMultiSearch();
