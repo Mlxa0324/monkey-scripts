@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Quick Search - 快速搜索
 // @namespace   Violentmonkey Scripts
-// @version     1.3
+// @version     1.4
 // @author      smallx
 // @description 无缝集成 划词搜索 + 快捷键搜索 + 搜索跳转 + 网址导航, 享受丝滑搜索体验
 // @homepageURL https://github.com/smallx/monkey-scripts/tree/master/quick-search
@@ -67,7 +67,7 @@
         //   - name 搜索引擎名称
         //   - url 搜索引擎搜索url
         //   - home 搜索引擎主页url
-        //   - hotkeys 快捷键列表, 仅支持配置单字符按键的code值, 实际起作用的是配置的单字符键 及 Alt+单字符键, s/d/f/l键已被脚本征用
+        //   - hotkeys 快捷键列表, 仅支持配置单字符按键的code值, 实际起作用的是Alt+单字符键, S/D/F/L键已被脚本征用
         //   - enable 是否启用
         //
         hotkeyEngines: [
@@ -1372,10 +1372,13 @@
     }
 
     // 判断是否允许响应当前按键
-    // 默认只响应: 输入框外的单字符按键 / Alt+单字符 / Cmd/Ctrl+Alt+单字符
+    // 默认只响应: 单字符的Escape / Alt+单字符 / Cmd/Ctrl+Alt+单字符
     function isAllowHotkey(event) {
         var target = event.target;
-        if ((event.metaKey || event.ctrlKey) && !event.altKey) {
+        if (!qsPageLock && event.code == 'Escape') {
+            return true;
+        }
+        if (!event.altKey) {
             return false;
         }
         if (event.shiftKey) {
@@ -1384,15 +1387,8 @@
         if (qsPageLock && event.code != 'KeyL') {
             return false;
         }
-        if (!qsPageLock && event.code == 'Escape') {
-            return true;
-        }
-        if (target.tagName == 'INPUT' || target.tagName == 'TEXTAREA') {
-            if (!conf.enableOnInput) {
-                return false;
-            } else if (!event.altKey) {
-                return false;
-            }
+        if ((target.tagName == 'INPUT' || target.tagName == 'TEXTAREA') && !conf.enableOnInput) {
+            return false;
         }
         if (qsSettingBox && qsSettingBox.contains(target)) {
             return false;
@@ -2293,7 +2289,7 @@
             return;
         }
 
-        // (Alt+)S键, 超级快搜. 优先级如下:
+        // Alt+S键, 超级快搜. 优先级如下:
         // 1. 快搜主窗口可见, 使用默认搜索引擎搜索搜索框文本.
         // 2. 网页有选中文本, 使用默认搜索引擎搜索文本.
         // 3. 当前页面url中有搜索词, 挑选当前搜索引擎分类中的另一个搜索引擎搜索该词.
@@ -2328,14 +2324,14 @@
             return;
         }
 
-        // (Alt+)D键, 网址直达. 网址优先级: 搜索框已有网址(若快搜主窗口可见) > 网页中选中网址
+        // Alt+D键, 网址直达. 网址优先级: 搜索框已有网址(若快搜主窗口可见) > 网页中选中网址
         if (e.code == 'KeyD') {
             e.preventDefault();
             openUrl(getUrl().url, e);
             return;
         }
 
-        // (Alt+)自定义快捷键搜索. 文本优先级: 搜索框已有文本(若快搜主窗口可见) > 网页中选中文本 > 当前页面搜索词
+        // Alt+自定义快捷键搜索. 文本优先级: 搜索框已有文本(若快搜主窗口可见) > 网页中选中文本 > 当前页面搜索词
         if (hotkey2Engine[e.code]) {
             e.preventDefault();
             var engine = hotkey2Engine[e.code];
@@ -2374,7 +2370,7 @@
                 return;
             }
 
-            // (Alt+)F键, 显示/隐藏快搜主窗口
+            // Alt+F键, 显示/隐藏快搜主窗口
             if (e.code == 'KeyF') {
                 e.preventDefault();
                 if (!isMainBoxVisual()) {
@@ -2393,7 +2389,7 @@
                 return;
             }
 
-            // (Alt+)L键, 锁定/解锁快搜所有功能.
+            // Alt+L键, 锁定/解锁快搜所有功能.
             if (e.code == 'KeyL') {
                 e.preventDefault();
                 toggleQuickSearchPageLock();
@@ -2408,7 +2404,7 @@
             }
 
             if (e.data.keydown) {
-                if (e.data.keydown == 'KeyF') {
+                if (e.data.keydown == 'Alt+KeyF') {
                     if (!qsPageLock) {
                         if (!isMainBoxVisual()) {
                             showMainBox(e.data.query);
@@ -2417,7 +2413,7 @@
                         }
                     }
                 }
-                if (e.data.keydown == 'KeyL') {
+                if (e.data.keydown == 'Alt+KeyL') {
                     toggleQuickSearchPageLock();
                 }
             }
@@ -2431,19 +2427,19 @@
     if (window.self != window.top) {
         // 向top窗口发送消息
         window.addEventListener('keydown', function (e) {
-            if (e.code == 'KeyF') {
+            if (e.altKey && e.code == 'KeyF') {
                 var query = getSelection();
                 // 跨域iframe中不能执行window.top.origin, 故此处使用*
                 window.top.postMessage({
                     source: 'qs-iframe',
-                    keydown: 'KeyF',
+                    keydown: 'Alt+KeyF',
                     query: query
                 }, '*');
             }
-            if (e.code == 'KeyL') {
+            if (e.altKey && e.code == 'KeyL') {
                 window.top.postMessage({
                     source: 'qs-iframe',
-                    keydown: 'KeyL'
+                    keydown: 'Alt+KeyL'
                 }, '*');
             }
         }, true);
