@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Quick Search - 快速搜索
 // @namespace   Violentmonkey Scripts
-// @version     1.4
+// @version     1.5
 // @author      smallx
 // @description 无缝集成 划词搜索 + 快捷键搜索 + 搜索跳转 + 网址导航, 享受丝滑搜索体验
 // @homepageURL https://github.com/smallx/monkey-scripts/tree/master/quick-search
@@ -1420,16 +1420,14 @@
         }
 
         // 补全网址
-        if (url) {
+        if (url && !url.includes('://')) {
             var dotCount = (url.match(/\./g) || []).length;
             if (dotCount == 0) {
                 url = 'www.' + url + '.com';
             } else if (dotCount == 1) {
                 url = 'www.' + url;
             }
-            if (!url.includes('://')) {
-                url = 'http://' + url;
-            }
+            url = 'http://' + url;
         }
 
         if (!url) {
