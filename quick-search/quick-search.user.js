@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Quick Search - 快速搜索
 // @namespace   Violentmonkey Scripts
-// @version     1.5
+// @version     1.6
 // @author      smallx
 // @description 无缝集成 划词搜索 + 快捷键搜索 + 搜索跳转 + 网址导航, 享受丝滑搜索体验
 // @homepageURL https://github.com/smallx/monkey-scripts/tree/master/quick-search
@@ -32,7 +32,7 @@
         showClassifiedEngines: true,    // 显示分类搜索引擎
         showPlaceholder: true,          // 显示使用方式提示信息(如搜索框placeholder)
         enableOnInput: true,            // 是否在input/textarea上启用划词和快捷键
-        autoCopyToClipboard: true,      // 划词时自动复制到剪贴板(内容为文本格式)
+        autoCopyToClipboard: false,     // 划词时自动复制到剪贴板(内容为文本格式)
         //
         // 搜索建议配置
         //
